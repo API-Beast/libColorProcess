@@ -10,13 +10,21 @@ template<typename T, auto X, auto Y, auto Z>
 struct Vector3Mixin : public T
 {
 	using SelfT = Vector3Mixin<T, X, Y, Z>;
-	using X_Type = mem_type<decltype(X)>::type;
-	using Y_Type = mem_type<decltype(Y)>::type;
-	using Z_Type = mem_type<decltype(Z)>::type;
+	using X_Type = typename mem_type<decltype(X)>::type;
+	using Y_Type = typename mem_type<decltype(Y)>::type;
+	using Z_Type = typename mem_type<decltype(Z)>::type;
+	static_assert(X != Y, "Possible typo, X and Y must point to different members");
+	static_assert(Y != Z, "Possible typo, Y and Z must point to different members");
 
-	constexpr Vector3Mixin() : T(){};
+	Vector3Mixin() : T(){};
 	Vector3Mixin(const T& base) : T(base){};
-	constexpr Vector3Mixin(const X_Type& x, const Y_Type& y, const Z_Type& z) : T(){ this->*X = x; this->*Y = y; this->*Z = z;};
+	Vector3Mixin(float scalar) : T(){ this->*X = scalar; this->*Y = scalar; this->*Z = scalar;};
+	Vector3Mixin(X_Type px, Y_Type py, Z_Type pz) : T()
+	{
+		this->*X = px;
+		this->*Y = py;
+		this->*Z = pz;
+	};
 
 	template <typename P, auto... Args>
 	Vector3Mixin(const Vector3Mixin<P, Args...>& p) : T(p){};
@@ -37,7 +45,7 @@ struct Vector3Mixin : public T
 #define def_operator(OPER)\
 /* vector x vector */\
 template<typename T, auto X, auto Y, auto Z, typename P, auto X2, auto Y2, auto Z2>\
-constexpr Vector3Mixin<T, X, Y, Z> operator OPER(const Vector3Mixin<T, X, Y, Z>& vec, const Vector3Mixin<P, X2, Y2, Z2>& other){ return {vec.*X OPER other.*X2, vec.*Y OPER other.*Y2, vec.*Z OPER other.*Z2}; }\
+constexpr Vector3Mixin<T, X, Y, Z> operator OPER(const Vector3Mixin<T, X, Y, Z>& vec, const Vector3Mixin<P, X2, Y2, Z2>& other){ Vector3Mixin<T, X, Y, Z> converted(other); return {vec.*X OPER converted.*X, vec.*Y OPER converted.*Y, vec.*Z OPER converted.*Z}; }\
 /* vector x scalar */\
 template<typename T, auto X, auto Y, auto Z>\
 constexpr Vector3Mixin<T, X, Y, Z> operator OPER(const Vector3Mixin<T, X, Y, Z>& vec, float scalar){ return {vec.*X OPER scalar, vec.*Y OPER scalar, vec.*Z OPER scalar}; }\

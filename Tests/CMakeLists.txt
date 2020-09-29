@@ -1,3 +1,3 @@
-add_executable(ColorsTest Colors_Test.cpp)
-target_link_libraries(ColorsTest ColorToolCore)
-add_test(NAME Colors.h COMMAND ColorsTest)
+add_executable(Tests Tests.cpp yestest.cpp)
+target_link_libraries(Tests ColorToolCore)
+add_test(NAME Colors.h COMMAND Tests)

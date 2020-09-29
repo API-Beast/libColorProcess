@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Math/Vector3.h"
-#include "../Math/CircularFloat.h"
 #include <cstdint>
 #include <cmath>
 #include <utility>
@@ -9,20 +8,23 @@
 namespace Colors
 {
 
-struct LinearRGBTemplate;
-struct sRGBTemplate;
-struct sRGBu8Template;
-struct HSVTemplate;
-struct LinearHSVTemplate;
-struct HCYTemplate;
+struct LinearRGBBase;
+struct sRGBBase;
+struct sRGBu8Base;
+struct sHSVBase;
+struct LinearHSVBase;
+struct HCYBase;
 
-struct LinearRGBTemplate
+struct LinearRGBBase
 {
 	float red = 0.0;
 	float green = 0.0;
 	float blue = 0.0;
 
-	operator sRGBTemplate() const;
+	constexpr LinearRGBBase() = default;
+	constexpr LinearRGBBase(float r, float g, float b):red(r),green(g),blue(b){};
+	constexpr LinearRGBBase(const Vector3Base<float>& vec):red(vec.x),green(vec.y),blue(vec.z){};
+	operator sRGBBase() const;
 
 	static constexpr float linear_component_to_sRGB_component(float val)
 	{
@@ -30,13 +32,14 @@ struct LinearRGBTemplate
 	};
 };
 
-struct sRGBTemplate
+struct sRGBBase
 {
 	float red = 0.0;
 	float green = 0.0;
 	float blue = 0.0;
 
-	operator LinearRGBTemplate() const;
+	operator LinearRGBBase() const;
+	operator sRGBu8Base() const;
 	
 	static constexpr float sRGB_component_to_linear_component(float val)
 	{
@@ -47,53 +50,58 @@ struct sRGBTemplate
 	};
 };
 
-struct sRGBu8Template
+struct sRGBu8Base
 {
 	uint8_t red = 0;
 	uint8_t green = 0;
 	uint8_t blue = 0;
 
-	operator sRGBTemplate() const;
+	operator sRGBBase() const;
 };
 
-struct HSVTemplate
+struct HSVBase
 {
-	CircularFloat hue = 0.0;
+	float hue = 0.0;
 	float saturation = 0.0;
 	float value = 0.0;
 
-	constexpr HSVTemplate() = default;
-	explicit HSVTemplate(const sRGBTemplate& rgbf);
+	constexpr HSVBase() = default;
+	constexpr HSVBase(float h, float s, float v):hue(h),saturation(s),value(v){};
+	HSVBase(const sRGBBase& rgbf);
+	operator sRGBBase() const;
 };
 
-struct LinearHSVTemplate
+struct LinearHSVBase
 {
-	CircularFloat hue = 0.0;
+	float hue = 0.0;
 	float saturation = 0.0;
 	float value = 0.0;
 
-	constexpr LinearHSVTemplate() = default;
-	explicit LinearHSVTemplate(const LinearRGBTemplate& rgbf);
+	constexpr LinearHSVBase() = default;
+	constexpr LinearHSVBase(float h, float s, float v):hue(h),saturation(s),value(v){};
+	explicit LinearHSVBase(const LinearRGBBase& rgbf);
+	operator LinearRGBBase() const;
 };
 
-struct HCYTemplate
+struct HCYBase
 {
-	CircularFloat hue = 0.0;
+	float hue = 0.0;
 	float chroma = 0.0;
 	float luminance = 0.0;
 
-	constexpr HCYTemplate() = default;
-	explicit HCYTemplate(const LinearRGBTemplate& rgbf);
+	constexpr HCYBase() = default;
+	explicit HCYBase(const LinearRGBBase& rgbf);
+	operator LinearRGBBase() const;
 
-	//static float get_max_chroma(float luminance, CircularFloat hue);
-	//static std::pair<float> get_luminance_limits(float chroma, CircularFloat hue);
+	static std::pair<float, float> get_luminance_limits(float chroma, float hue);
 };
 
-using LinRGB = Vector3Mixin<LinearRGBTemplate, &LinearRGBTemplate::red, &LinearRGBTemplate::green, &LinearRGBTemplate::blue>;
-using sRGB = Vector3Mixin<sRGBTemplate, &sRGBTemplate::red, &sRGBTemplate::green, &sRGBTemplate::blue>;
-using sRGBu8 = Vector3Mixin<sRGBu8Template, &sRGBu8Template::red, &sRGBu8Template::green, &sRGBu8Template::blue>;
-using HSV = Vector3Mixin<HSVTemplate, &HSVTemplate::hue, &HSVTemplate::saturation, &HSVTemplate::value>;
-using LinearHSV = Vector3Mixin<LinearHSVTemplate, &LinearHSVTemplate::hue, &LinearHSVTemplate::saturation, &LinearHSVTemplate::value>;
-using HCY = Vector3Mixin<HCYTemplate, &HCYTemplate::hue, &HCYTemplate::chroma, &HCYTemplate::luminance>;
+using LinRGB = Vector3Mixin<LinearRGBBase, &LinearRGBBase::red, &LinearRGBBase::green,      &LinearRGBBase::blue >;
+using LinHSV = Vector3Mixin<LinearHSVBase, &LinearHSVBase::hue, &LinearHSVBase::saturation, &LinearHSVBase::value>;
+using HCY    = Vector3Mixin<HCYBase,       &HCYBase::hue,       &HCYBase::chroma,           &HCYBase::luminance  >;
+
+using sRGB   = Vector3Mixin<sRGBBase,   &sRGBBase::red,   &sRGBBase::green,      &sRGBBase::blue  >;
+using sRGBu8 = Vector3Mixin<sRGBu8Base, &sRGBu8Base::red, &sRGBu8Base::green,    &sRGBu8Base::blue>;
+using sHSV   = Vector3Mixin<HSVBase,    &HSVBase::hue,    &HSVBase::saturation,  &HSVBase::value >;
 
 }
