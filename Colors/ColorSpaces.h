@@ -104,4 +104,16 @@ using sRGB   = Vector3Mixin<sRGBBase,   &sRGBBase::red,   &sRGBBase::green,     
 using sRGBu8 = Vector3Mixin<sRGBu8Base, &sRGBu8Base::red, &sRGBu8Base::green,    &sRGBu8Base::blue>;
 using sHSV   = Vector3Mixin<HSVBase,    &HSVBase::hue,    &HSVBase::saturation,  &HSVBase::value >;
 
+template<typename T, typename P>
+constexpr T colorspace_cast(const P& val)
+{
+	// Direct conversion possible
+	if constexpr(std::is_convertible<P, T>::value)
+		return val;
+	else if constexpr(std::is_same<T, LinRGB>::value)
+		return colorspace_cast<sRGB>(val);
+	else if constexpr(std::is_same<T, sRGB>::value)
+		return colorspace_cast<sRGBu8>(val);
+};
+
 }

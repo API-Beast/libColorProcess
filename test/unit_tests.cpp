@@ -1,7 +1,7 @@
 #include "yestest.h"
 #include <ColorToolCore.h>
 #include <type_traits>
-#include <Math/CircularFloat.h>
+#include <random>
 
 YES_MAIN();
 
@@ -19,21 +19,45 @@ namespace YesTest
 	}
 }
 
-YES_TEST(Math, CircularFloat)
+namespace
 {
-	CircularFloat a(0.5);
-	EXPECT_EQf(a+0.3, 0.8);
-	EXPECT_EQf(a+0.5, 0.0);
-	EXPECT_EQf(a+0.7, 0.2);
-	EXPECT_EQf(a+0.9, 0.4);
-	EXPECT_EQf(a-0.3, 0.2);
-	EXPECT_EQf(a-0.5, 0.0);
-	EXPECT_EQf(a-0.7, 0.8);
-	EXPECT_EQf(a-0.9, 0.6);
-	//EXPECT_GREATER(CircularFloat(0.8), CircularFloat(0.5));
-	EXPECT_LESSER(CircularFloat(0.3), CircularFloat(0.5));
-	EXPECT_LESSER(CircularFloat(1.2), CircularFloat(0.9));
-	EXPECT_GREATER(CircularFloat(0.9), CircularFloat(1.3));
+	HCY random_color()
+	{
+		static std::random_device rd;
+		static std::default_random_engine rng(rd());
+		std::uniform_real_distribution<double> dist(0.0, 1.0);
+		
+		HCY retVal;
+		retVal.hue = dist(rng);
+		retVal.chroma = dist(rng);
+
+		auto limits = HCY::get_luminance_limits(retVal.hue, retVal.chroma);
+		std::uniform_real_distribution<double> lum_dist(limits.first, limits.second);
+		retVal.luminance = lum_dist(rng);
+
+		return retVal;
+	};
+}
+
+YES_TEST(Colors, ColorPalette)
+{
+	ColorPalette<HCY> pal;
+	pal.entries.resize(512);
+	std::generate(pal.entries.begin(), pal.entries.end(), random_color);
+
+	ColorPalette<HCY> copy = pal;
+	copy.reduce_using_median_split(32, calc_perceptive_factors);
+	EXPECT_EQ(pal.size(), 512);
+	EXPECT_EQ(copy.size(), 32);
+
+	int entries_in_both = 0;
+	for(HCY val : copy.entries)
+	{
+		auto where = std::find(pal.entries.begin(), pal.entries.end(), val);
+		if(where != pal.entries.end())
+			entries_in_both++;
+	}
+	EXPECT_EQ(entries_in_both, copy.size());
 }
 
 YES_TEST(Colors, Functions)

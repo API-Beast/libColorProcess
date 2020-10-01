@@ -16,10 +16,10 @@ struct Vector3Mixin : public T
 	static_assert(X != Y, "Possible typo, X and Y must point to different members");
 	static_assert(Y != Z, "Possible typo, Y and Z must point to different members");
 
-	Vector3Mixin() : T(){};
-	Vector3Mixin(const T& base) : T(base){};
-	Vector3Mixin(float scalar) : T(){ this->*X = scalar; this->*Y = scalar; this->*Z = scalar;};
-	Vector3Mixin(X_Type px, Y_Type py, Z_Type pz) : T()
+	constexpr Vector3Mixin() : T(){};
+	constexpr Vector3Mixin(const T& base) : T(base){};
+	constexpr Vector3Mixin(float scalar) : T(){ this->*X = scalar; this->*Y = scalar; this->*Z = scalar;};
+	constexpr Vector3Mixin(X_Type px, Y_Type py, Z_Type pz) : T()
 	{
 		this->*X = px;
 		this->*Y = py;
@@ -27,7 +27,7 @@ struct Vector3Mixin : public T
 	};
 
 	template <typename P, auto... Args>
-	Vector3Mixin(const Vector3Mixin<P, Args...>& p) : T(p){};
+	constexpr Vector3Mixin(const Vector3Mixin<P, Args...>& p) : T(p){};
 	
 	constexpr bool operator==(const SelfT& other){ return this->*X == other.*X && this->*Y == other.*Y && this->*Z == other.*Z;  };
 	constexpr bool operator!=(const SelfT& other){ return !operator==(other);  };
