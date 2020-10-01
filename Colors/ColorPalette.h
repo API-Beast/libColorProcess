@@ -1,13 +1,24 @@
 #pragma once
 
 #include <algorithm>
-
+namespace Colors
+{
 template<typename EntryT>
 struct ColorPalette
 {
 	std::vector<EntryT> entries;
 
-	size_t size(){ return entries.size(); };
+	ColorPalette() = default;
+	ColorPalette(const ColorPalette<EntryT>& other) = default;
+
+	template<typename OtherT>
+	ColorPalette(const ColorPalette<OtherT>& other)
+	{
+		entries.resize(other.size());
+		std::transform(other.entries.begin(), other.entries.end(), entries.begin(), [](const OtherT& color){ return colorspace_cast<EntryT>(color); });
+	};
+
+	size_t size() const{ return entries.size(); };
 
 	template<typename Func>
 	auto analyze(Func axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>
@@ -189,3 +200,5 @@ struct ColorPalette
 
 
 };
+
+}

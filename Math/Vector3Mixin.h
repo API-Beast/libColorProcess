@@ -13,6 +13,7 @@ struct Vector3Mixin : public T
 	using X_Type = typename mem_type<decltype(X)>::type;
 	using Y_Type = typename mem_type<decltype(Y)>::type;
 	using Z_Type = typename mem_type<decltype(Z)>::type;
+	using BaseType = T;
 	static_assert(X != Y, "Possible typo, X and Y must point to different members");
 	static_assert(Y != Z, "Possible typo, Y and Z must point to different members");
 

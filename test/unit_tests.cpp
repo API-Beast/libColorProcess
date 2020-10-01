@@ -39,6 +39,13 @@ namespace
 	};
 }
 
+YES_TEST(Colors, colorspace_cast)
+{
+	//EXPECT_EQ(colorspace_cast<LinRGB>(HCY(0.0, 1.0, luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
+	EXPECT_EQ(colorspace_cast<sRGB>(sRGBu8(255, 255, 255)), sRGB(1.0, 1.0, 1.0));
+	EXPECT_EQ(colorspace_cast<LinRGB>(sRGBu8(255, 255, 255)), LinRGB(1.0, 1.0, 1.0));
+}
+
 YES_TEST(Colors, ColorPalette)
 {
 	ColorPalette<HCY> pal;
@@ -58,6 +65,11 @@ YES_TEST(Colors, ColorPalette)
 			entries_in_both++;
 	}
 	EXPECT_EQ(entries_in_both, copy.size());
+
+	ColorPalette<sRGBu8> conversion = copy;
+	EXPECT_EQ(conversion.size(), copy.size());
+	EXPECT_EQ(conversion.entries[0], colorspace_cast<sRGBu8>(copy.entries[0]));
+	EXPECT_EQ(conversion.entries.back(), colorspace_cast<sRGBu8>(copy.entries.back()));
 }
 
 YES_TEST(Colors, Functions)
@@ -157,7 +169,7 @@ YES_TEST(Colors, HSV)
 	EXPECT_EQf(LinRGB(blue_hsv), blue);
 }
 
-YES_TEST(Colors, HCY)
+YES_TEST(Colors, LinRGB_to_HCY)
 {
 	LinRGB red(1.0, 0.0, 0.0);
 	HCY red_hcy(red);
@@ -176,4 +188,9 @@ YES_TEST(Colors, HCY)
 	EXPECT_EQf(blue_hcy.hue, 2.0f / 3.0f);
 	EXPECT_EQ(blue_hcy.chroma, 1.0f);
 	EXPECT_EQf(blue_hcy.luminance, luminance709(blue));
+}
+
+YES_TEST(Colors, HCY_to_LinRGB)
+{
+	EXPECT_EQ(colorspace_cast<LinRGB>(HCY(0.0, 1.0, luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
 }

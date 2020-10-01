@@ -105,15 +105,32 @@ using sRGBu8 = Vector3Mixin<sRGBu8Base, &sRGBu8Base::red, &sRGBu8Base::green,   
 using sHSV   = Vector3Mixin<HSVBase,    &HSVBase::hue,    &HSVBase::saturation,  &HSVBase::value >;
 
 template<typename T, typename P>
-constexpr T colorspace_cast(const P& val)
+T colorspace_cast(const P& val)
 {
-	// Direct conversion possible
-	if constexpr(std::is_convertible<P, T>::value)
+	// We expect all T's and P's to be Vector3Mixins
+	using TBase = typename T::BaseType;
+	using PBase = typename P::BaseType;
+	if constexpr(std::is_same<T, P>::value)
 		return val;
+	// Direct conversion if possible
+	else if constexpr(std::is_assignable<PBase, TBase>::value)
+		return T(val);
 	else if constexpr(std::is_same<T, LinRGB>::value)
 		return colorspace_cast<sRGB>(val);
+	else if constexpr(std::is_same<T, sRGBu8>::value)
+		return colorspace_cast<sRGB>(val);
 	else if constexpr(std::is_same<T, sRGB>::value)
-		return colorspace_cast<sRGBu8>(val);
+	{
+		if constexpr(std::is_assignable<PBase, LinearRGBBase>::value)
+			return colorspace_cast<LinRGB>(val);
+		else if constexpr(std::is_assignable<PBase, sRGBu8Base>::value)
+			return colorspace_cast<sRGBu8>(val);
+	}
+	else
+	{
+		//static_assert(false, "Types not compatible with colorspace_cast");
+		return static_cast<T>(val);
+	}
 };
 
 }
