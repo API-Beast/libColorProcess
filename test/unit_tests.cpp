@@ -10,7 +10,7 @@ using namespace Colors;
 namespace YesTest
 {
 	template<typename T, auto X, auto Y, auto Z>
-	void print_value(Vector3Mixin<T,X,Y,Z> f) { printf("%f %f %f", double(f.*X), double(f.*Y), double(f.*Z));}
+	void print_value(Vector3Mixin<T,X,Y,Z> f) { print_value(f.*X, f.*Y, f.*Z); }
 
 	template<typename T, auto X, auto Y, auto Z>
 	inline int ulp_difference(Vector3Mixin<T,X,Y,Z> a, Vector3Mixin<T,X,Y,Z> b)
@@ -41,9 +41,23 @@ namespace
 
 YES_TEST(Colors, colorspace_cast)
 {
-	//EXPECT_EQ(colorspace_cast<LinRGB>(HCY(0.0, 1.0, luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
-	EXPECT_EQ(colorspace_cast<sRGB>(sRGBu8(255, 255, 255)), sRGB(1.0, 1.0, 1.0));
-	EXPECT_EQ(colorspace_cast<LinRGB>(sRGBu8(255, 255, 255)), LinRGB(1.0, 1.0, 1.0));
+	LinRGB src(0.0, 0.0, 1.0);
+	sRGB srgb = colorspace_cast<sRGB>(src);
+	sRGBu8 srgb8 = colorspace_cast<sRGBu8>(src);
+	sHSV shsv = colorspace_cast<sHSV>(src);
+	LinHSV linhsv = colorspace_cast<LinHSV>(src);
+	HCY hcy = colorspace_cast<HCY>(src);
+
+	EXPECT_EQf(colorspace_cast<LinRGB>(srgb), src);
+	EXPECT_EQf(colorspace_cast<LinRGB>(srgb8), src);
+	EXPECT_EQf(colorspace_cast<LinRGB>(shsv), src);
+	EXPECT_EQf(colorspace_cast<LinRGB>(linhsv), src);
+	EXPECT_EQf(colorspace_cast<LinRGB>(hcy), src);
+	PRINT_INFO(srgb);
+	PRINT_INFO(srgb8);
+	PRINT_INFO(shsv);
+	PRINT_INFO(linhsv);
+	PRINT_INFO(hcy);
 }
 
 YES_TEST(Colors, ColorPalette)
@@ -192,5 +206,5 @@ YES_TEST(Colors, LinRGB_to_HCY)
 
 YES_TEST(Colors, HCY_to_LinRGB)
 {
-	EXPECT_EQ(colorspace_cast<LinRGB>(HCY(0.0, 1.0, luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
+	EXPECT_EQf(colorspace_cast<LinRGB>(HCY(0.0, 1.0, luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
 }

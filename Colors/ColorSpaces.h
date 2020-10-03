@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cmath>
 #include <utility>
+#include <iostream>
 
 namespace Colors
 {
@@ -113,24 +114,23 @@ T colorspace_cast(const P& val)
 	if constexpr(std::is_same<T, P>::value)
 		return val;
 	// Direct conversion if possible
-	else if constexpr(std::is_assignable<PBase, TBase>::value)
-		return T(val);
+	else if constexpr(std::is_convertible<PBase, TBase>::value)
+		return static_cast<TBase>(PBase(val));
 	else if constexpr(std::is_same<T, LinRGB>::value)
 		return colorspace_cast<sRGB>(val);
 	else if constexpr(std::is_same<T, sRGBu8>::value)
 		return colorspace_cast<sRGB>(val);
 	else if constexpr(std::is_same<T, sRGB>::value)
 	{
-		if constexpr(std::is_assignable<PBase, LinearRGBBase>::value)
+		if constexpr(std::is_convertible<PBase, LinearRGBBase>::value)
 			return colorspace_cast<LinRGB>(val);
-		else if constexpr(std::is_assignable<PBase, sRGBu8Base>::value)
+		else if constexpr(std::is_convertible<PBase, sRGBu8Base>::value)
 			return colorspace_cast<sRGBu8>(val);
+		else
+			return static_cast<TBase>(PBase(val));
 	}
 	else
-	{
-		//static_assert(false, "Types not compatible with colorspace_cast");
-		return static_cast<T>(val);
-	}
+		return static_cast<TBase>(PBase(val));
 };
 
 }

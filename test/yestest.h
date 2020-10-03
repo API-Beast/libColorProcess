@@ -37,16 +37,35 @@ namespace YesTest
 	std::vector<Test>& get_test_list();
 	bool register_test(Test t);
 
-	inline void print_value(bool b)         { if(b) printf("true"); else printf("false");};
-	inline void print_value(int v)          { printf("%d", v); };
-	inline void print_value(unsigned int v) { printf("%u", v); };
-	inline void print_value(double v)       { printf("%f", v); };
-	inline void print_value(long double v)  { printf("%Lf", v); };
-	inline void print_value(long long int v){ printf("%lld", v); };
-	inline void print_value(long long unsigned int v){ printf("%llu", v); };
+	inline void print_value(bool b)         { if(b) printf(" true"); else printf("false");};
+	inline void print_value(int v)          { printf("%5d", v); };
+	inline void print_value(unsigned int v) { printf("%5u", v); };
+	inline void print_value(float v)        { printf("%5.3f", double(v)); };
+	inline void print_value(double v)       { printf("%5.3f", v); };
+	inline void print_value(long double v)  { printf("%5.3Lf", v); };
+	inline void print_value(long long int v){ printf("%5.3lld", v); };
+	inline void print_value(long long unsigned int v){ printf("%5llu", v); };
 	template<typename T>
-	inline void print_value(T* ptr){ printf("%p", ptr); };
+	inline void print_value(T* ptr){ printf("%5p", ptr); };
 	inline void print_value(std::nullptr_t){ printf("nullptr"); };
+
+	template<typename A, typename B>
+	inline void print_value(A arg1, B arg2)
+	{
+		print_value(static_cast<typename std::decay<A>::type>(arg1));
+		printf(", ");
+		print_value(static_cast<typename std::decay<B>::type>(arg2));
+	}
+
+	template<typename A, typename B, typename... Args>
+	inline void print_value(A arg1, B arg2, Args... args)
+	{
+		print_value(static_cast<typename std::decay<A>::type>(arg1));
+		printf(", ");
+		print_value(static_cast<typename std::decay<B>::type>(arg2));
+		printf(", ");
+		print_value(args...);
+	}
 
 	// ULP = unit of least precision, how many discrete steps floats differ
 	inline int ulp_difference(float a, float b)
@@ -149,7 +168,7 @@ namespace YesTest
 	if(*yes_test_errors)\
 	{\
 		auto val = (x);\
-		printf(" -> |       Info: "#x" = %s", CLR_YELLOW);\
+		printf(" -> |       Info: %8s = %s", #x, CLR_CYAN);\
 		YesTest::print_value(val);\
 		printf("%s\n", CLR_RESET);\
 	}\
