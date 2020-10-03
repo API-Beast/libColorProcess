@@ -1,8 +1,7 @@
 #pragma once
 
 #include <algorithm>
-namespace Colors
-{
+
 template<typename EntryT>
 struct ColorPalette
 {
@@ -200,5 +199,3 @@ struct ColorPalette
 
 
 };
-
-}

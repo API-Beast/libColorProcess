@@ -5,8 +5,6 @@
 
 YES_MAIN();
 
-using namespace Colors;
-
 namespace YesTest
 {
 	template<typename T, auto X, auto Y, auto Z>

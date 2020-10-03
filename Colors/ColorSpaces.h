@@ -6,9 +6,6 @@
 #include <utility>
 #include <iostream>
 
-namespace Colors
-{
-
 struct LinearRGBBase;
 struct sRGBBase;
 struct sRGBu8Base;
@@ -132,5 +129,3 @@ T colorspace_cast(const P& val)
 	else
 		return static_cast<TBase>(PBase(val));
 };
-
-}

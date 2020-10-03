@@ -4,9 +4,6 @@
 #include <algorithm>
 #include <iostream>
 
-namespace Colors
-{
-
 namespace
 {
 
@@ -116,6 +113,4 @@ std::pair<float, float> HCYBase::get_luminance_limits(float chroma, float hue)
 	float lower_limit = full_chroma_lum * chroma;
 	float upper_limit = (full_chroma_lum - 1.0) * chroma + 1.0;
 	return std::make_pair(lower_limit, upper_limit);
-}
-
 }
