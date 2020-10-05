@@ -177,9 +177,33 @@ namespace YesTest
 #define EXPECT_EQ(x, y) EXPECT_OP(x, y, ==, !=)
 #define EXPECT_NEQ(x, y) EXPECT_OP(x, y, !=, ==)
 #define EXPECT_GREATER(x, y) EXPECT_OP(x, y, >, <=)
-#define EXPECT_LESSER(x, y) EXPECT_OP(x, y, <, >=)
+#define EXPECT_LESS(x, y) EXPECT_OP(x, y, <, >=)
 #define EXPECT_GREATER_OR_EQ(x, y) EXPECT_OP(x, y, >=, <)
-#define EXPECT_LESSER_OR_EQ(x, y) EXPECT_OP(x, y, <=, >)
+#define EXPECT_LESS_OR_EQ(x, y) EXPECT_OP(x, y, <=, >)
+
+#define ASSERT_OP(x, y, OPER, FAILURE)\
+{\
+	auto val_a = (x); auto val_b = (y);\
+	if(!(val_a OPER val_b))\
+	{\
+		(*yes_test_errors) += 1;\
+		YES_PRINT_FAILURE("assertion not fulfilled");\
+		printf(" -> |   Expected: "#x" "#OPER" "#y"\n");\
+		printf(" -> |     Actual: %s", CLR_YELLOW);\
+		YesTest::print_value(val_a);\
+		printf(" " #FAILURE " ");\
+		YesTest::print_value(val_b);\
+		printf("%s\n", CLR_RESET);\
+		return;\
+	}\
+}
+
+#define ASSERT_EQ(x, y) ASSERT_OP(x, y, ==, !=)
+#define ASSERT_NEQ(x, y) ASSERT_OP(x, y, !=, ==)
+#define ASSERT_GREATER(x, y) ASSERT_OP(x, y, >, <=)
+#define ASSERT_LESS(x, y) ASSERT_OP(x, y, <, >=)
+#define ASSERT_GREATER_OR_EQ(x, y) ASSERT_OP(x, y, >=, <)
+#define ASSERT_LESS_OR_EQ(x, y) ASSERT_OP(x, y, <=, >)
 
 #define EXPECT_BETWEEN(x, low, high) {\
 	auto val_a = (x); auto val_low = (low); auto val_high = (high);\

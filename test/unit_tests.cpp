@@ -1,5 +1,5 @@
 #include "yestest.h"
-#include <ColorToolCore.h>
+#include <libColorTool.h>
 #include <type_traits>
 #include <random>
 
@@ -58,31 +58,61 @@ YES_TEST(Colors, colorspace_cast)
 	PRINT_INFO(hcy);
 }
 
-YES_TEST(Colors, ColorPalette)
+YES_TEST(Colors, Palette_MedianSplit)
 {
 	ColorPalette<HCY> pal;
-	pal.entries.resize(512);
-	std::generate(pal.entries.begin(), pal.entries.end(), random_color);
+	pal.resize(512);
+	std::generate(pal.begin(), pal.end(), random_color);
 
-	ColorPalette<HCY> copy = pal;
-	copy.reduce_using_median_split(32, calc_perceptive_factors);
+	ColorPalette<HCY> reduced = Palette::reduce_using_median_split(pal, 32, Stats::perceptive_factors);
 	EXPECT_EQ(pal.size(), 512);
-	EXPECT_EQ(copy.size(), 32);
+	EXPECT_EQ(reduced.size(), 32);
 
 	int entries_in_both = 0;
-	for(HCY val : copy.entries)
+	for(HCY val : reduced)
 	{
-		auto where = std::find(pal.entries.begin(), pal.entries.end(), val);
-		if(where != pal.entries.end())
+		auto where = std::find(pal.begin(), pal.end(), val);
+		if(where != pal.end())
 			entries_in_both++;
 	}
-	EXPECT_EQ(entries_in_both, copy.size());
-
-	ColorPalette<sRGBu8> conversion = copy;
-	EXPECT_EQ(conversion.size(), copy.size());
-	EXPECT_EQ(conversion.entries[0], colorspace_cast<sRGBu8>(copy.entries[0]));
-	EXPECT_EQ(conversion.entries.back(), colorspace_cast<sRGBu8>(copy.entries.back()));
+	EXPECT_EQ(entries_in_both, reduced.size());
 }
+
+YES_TEST(Colors, Palette_CONVERSION)
+{
+	ColorPalette<HCY> pal(512);
+	std::generate(pal.begin(), pal.end(), random_color);
+	ColorPalette<sRGBu8> conversion = Palette::convert<sRGBu8>(pal);
+
+	EXPECT_EQ(conversion.size(), pal.size());
+	EXPECT_EQ(conversion[0], colorspace_cast<sRGBu8>(pal[0]));
+	EXPECT_EQ(conversion.back(), colorspace_cast<sRGBu8>(pal.back()));
+}
+
+YES_TEST(Colors, Palette_Sort)
+{
+	ColorPalette<HCY> pal(512);
+	std::generate(pal.begin(), pal.end(), random_color);
+
+	ColorPalette<HCY> sorted = Palette::sort(pal, Stats::linrgb_factors);
+	EXPECT_EQ(pal.size(), 512);
+	EXPECT_EQ(sorted.size(), 512);
+	ASSERT_EQ(pal.size(), sorted.size());
+
+	int equal_entries = 0;
+	int entries_in_both = 0;
+	for(int i = 0; i<sorted.size(); i++)
+	{
+		if(pal[i] == sorted[i])
+			equal_entries++;
+		auto where = std::find(pal.begin(), pal.end(), sorted[i]);
+		if(where != pal.end())
+			entries_in_both++;
+	}
+	EXPECT_LESS(equal_entries, sorted.size()/10); // Extremely unlikely that more than 10% of entries end up randomly pre-sorted
+	EXPECT_EQ(entries_in_both, sorted.size());
+}
+
 
 YES_TEST(Colors, Functions)
 {

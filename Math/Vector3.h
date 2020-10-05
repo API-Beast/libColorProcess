@@ -12,4 +12,6 @@ struct Vector3Base
 	constexpr Vector3Base(T x, T y, T z):x(x),y(y),z(z){};
 };
 
-using Vec3f = Vector3Mixin<Vector3Base<float>, &Vector3Base<float>::x, &Vector3Base<float>::y, &Vector3Base<float>::z>;
+template<typename T>
+using Vec3 = Vector3Mixin<Vector3Base<T>, &Vector3Base<T>::x, &Vector3Base<T>::y, &Vector3Base<T>::z>;
+using Vec3f = Vec3<float>;

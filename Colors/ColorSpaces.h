@@ -55,6 +55,7 @@ struct sRGBu8Base
 	uint8_t blue = 0;
 
 	operator sRGBBase() const;
+	uint32_t to_int();
 };
 
 struct HSVBase

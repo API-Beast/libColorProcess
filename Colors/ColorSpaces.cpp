@@ -30,6 +30,19 @@ sRGBu8Base::operator sRGBBase() const
 	return {red / float(UINT8_MAX), green / float(UINT8_MAX), blue / float(UINT8_MAX)};
 };
 
+uint32_t sRGBu8Base::to_int() 
+{
+	union Conv
+	{
+		sRGBu8Base col;
+		uint32_t integer;
+
+		Conv(sRGBu8Base p):col(p){};
+	};
+	Conv c(*this);
+	return c.integer;
+};
+
 sRGBBase::operator sRGBu8Base() const
 {
 	return {uint8_t(red * UINT8_MAX), uint8_t(green * UINT8_MAX), uint8_t(blue * UINT8_MAX)};

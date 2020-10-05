@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Colors/Analysis.h"
+#include "Colors/Stats.h"
 #include "Colors/ColorSpaces.h"
 #include "Colors/Colors.h"
-#include "Colors/ColorPalette.h"
+#include "Colors/Palette.h"
 #include "Math/Vector3.h"
 #include "Math/Vector3Mixin.h"
