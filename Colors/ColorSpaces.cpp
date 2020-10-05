@@ -34,10 +34,21 @@ uint32_t sRGBu8Base::to_int()
 {
 	union Conv
 	{
-		sRGBu8Base col;
+		struct
+		{
+			uint8_t alpha;
+			uint8_t blue;
+			uint8_t green;
+			uint8_t red;
+		} col;
 		uint32_t integer;
 
-		Conv(sRGBu8Base p):col(p){};
+		Conv(sRGBu8Base p):integer(UINT32_MAX)
+		{
+			col.red = p.red;
+			col.blue = p.blue;
+			col.green = p.green;
+		};
 	};
 	Conv c(*this);
 	return c.integer;

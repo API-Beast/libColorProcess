@@ -102,8 +102,8 @@ std::vector<EntryT> Palette::reduce_using_median_split(const std::vector<EntryT>
 		new_split.from = split_point;
 		find_axis_and_sort(to_split);
 		find_axis_and_sort(new_split);
-		reduce_split(to_split);
-		reduce_split(new_split);
+		//reduce_split(to_split);
+		//reduce_split(new_split);
 		splits.push_back(new_split);
 	}
 

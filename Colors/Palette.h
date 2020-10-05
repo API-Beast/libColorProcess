@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
 
 template<typename T>
 using ColorPalette = std::vector<T>;

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(ColorToolCore LANGUAGES CXX)
+project(libColorTool LANGUAGES CXX)
 
 # This is an internal CMake variable, we just expose it to the GUI.
 # It affects all library that have no type (e.g. no SHARED or STATIC)
-option(BUILD_SHARED_LIBS "Build ColorToolCore as shared library" OFF)
+option(BUILD_SHARED_LIBS "Build libColorTool as shared library" OFF)
 #option(CMAKE_LINK_SEARCH_START_STATIC "Prefer linking to static libraries" OFF)
 
 # We are using the project global variables instead of target properties so it applies to the tests too
@@ -17,14 +17,19 @@ list(APPEND HEADER_FILES Math/Vector3.h Math/Vector3Mixin.h)
 
 set(SOURCE_FILES Colors/Colors.cpp Colors/ColorSpaces.cpp)
 
-add_library(ColorToolCore ${SOURCE_FILES} ${HEADER_FILES})
-target_include_directories(ColorToolCore PUBLIC .)
-set_target_properties(ColorToolCore PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(libColorTool ${SOURCE_FILES} ${HEADER_FILES})
+target_include_directories(libColorTool PUBLIC .)
+set_target_properties(libColorTool PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-install(TARGETS ColorToolCore)
+install(TARGETS libColorTool)
 
-# Only do testing if not a sub-project
+# Only build examples and testing if not a sub-project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	include(CTest)
 	add_subdirectory(test)
+	
+	option(BUILD_EXAMPLES "Build libColorTool examples" ON)
+	if(BUILD_EXAMPLES)
+		add_subdirectory(examples)
+	endif()
 endif()
