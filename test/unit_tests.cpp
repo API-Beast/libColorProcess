@@ -126,9 +126,9 @@ YES_TEST(Colors, Palette_Sort)
 
 YES_TEST(Colors, Functions)
 {
-	EXPECT_EQf(saturate_hue(0.000000), Vec3f(1.0f, 0.0f, 0.0f));
-	EXPECT_EQf(saturate_hue(0.333333), Vec3f(0.0f, 1.0f, 0.0f));
-	EXPECT_EQf(saturate_hue(0.666666), Vec3f(0.0f, 0.0f, 1.0f));
+	EXPECT_EQf(Colors::saturate_hue(0.000000), Vec3f(1.0f, 0.0f, 0.0f));
+	EXPECT_EQf(Colors::saturate_hue(0.333333), Vec3f(0.0f, 1.0f, 0.0f));
+	EXPECT_EQf(Colors::saturate_hue(0.666666), Vec3f(0.0f, 0.0f, 1.0f));
 }
 
 YES_TEST(Math, Vec3f)
@@ -162,8 +162,8 @@ YES_TEST(Colors, ImplicitConversion)
 	LinRGB a(0.5, 0.5, 0.5);
 	sRGB b = a;
 	LinRGB c = b;
-	EXPECT_EQf(luminance709(a), luminance709(b));
-	EXPECT_EQf(luminance709(a), luminance709(c));
+	EXPECT_EQf(Colors::luminance709(a), Colors::luminance709(b));
+	EXPECT_EQf(Colors::luminance709(a), Colors::luminance709(c));
 	EXPECT_EQf((a+b).red, a.red + sRGB::sRGB_component_to_linear_component(b.red));
 	static_assert(std::is_same<decltype(a+b), decltype(a)>::value, "Operators have wrong result type");
 }
@@ -203,21 +203,21 @@ YES_TEST(Colors, HSV)
 	LinHSV red_hsv(red);
 	EXPECT_EQ(red_hsv.hue, 0.0f);
 	EXPECT_EQ(red_hsv.saturation, 1.0f);
-	EXPECT_EQf(luminance709(red_hsv), luminance709(red));
+	EXPECT_EQf(Colors::luminance709(red_hsv), Colors::luminance709(red));
 	EXPECT_EQf(LinRGB(red_hsv), red);
 
 	LinRGB green(0.0, 1.0, 0.0);
 	LinHSV green_hsv(green);
 	EXPECT_EQf(green_hsv.hue, 1.0f / 3.0f);
 	EXPECT_EQ(green_hsv.saturation, 1.0f);
-	EXPECT_EQf(luminance709(green_hsv), luminance709(green));
+	EXPECT_EQf(Colors::luminance709(green_hsv), Colors::luminance709(green));
 	EXPECT_EQf(LinRGB(green_hsv), green);
 
 	LinRGB blue(0.0, 0.0, 1.0);
 	LinHSV blue_hsv(blue);
 	EXPECT_EQf(blue_hsv.hue, 2.0f / 3.0f);
 	EXPECT_EQ(blue_hsv.saturation, 1.0f);
-	EXPECT_EQf(luminance709(blue_hsv), luminance709(blue));
+	EXPECT_EQf(Colors::luminance709(blue_hsv), Colors::luminance709(blue));
 	EXPECT_EQf(LinRGB(blue_hsv), blue);
 }
 
@@ -227,22 +227,22 @@ YES_TEST(Colors, LinRGB_to_HCY)
 	HCY red_hcy(red);
 	EXPECT_EQ(red_hcy.hue, 0.0f);
 	EXPECT_EQ(red_hcy.chroma, 1.0f);
-	EXPECT_EQf(red_hcy.luminance, luminance709(red));
+	EXPECT_EQf(red_hcy.luminance, Colors::luminance709(red));
 
 	LinRGB green(0.0, 1.0, 0.0);
 	HCY green_hcy(green);
 	EXPECT_EQf(green_hcy.hue, 1.0f / 3.0f);
 	EXPECT_EQ(green_hcy.chroma, 1.0f);
-	EXPECT_EQf(green_hcy.luminance, luminance709(green));
+	EXPECT_EQf(green_hcy.luminance, Colors::luminance709(green));
 
 	LinRGB blue(0.0, 0.0, 1.0);
 	HCY blue_hcy(blue);
 	EXPECT_EQf(blue_hcy.hue, 2.0f / 3.0f);
 	EXPECT_EQ(blue_hcy.chroma, 1.0f);
-	EXPECT_EQf(blue_hcy.luminance, luminance709(blue));
+	EXPECT_EQf(blue_hcy.luminance, Colors::luminance709(blue));
 }
 
 YES_TEST(Colors, HCY_to_LinRGB)
 {
-	EXPECT_EQf(colorspace_cast<LinRGB>(HCY(0.0, 1.0, luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
+	EXPECT_EQf(colorspace_cast<LinRGB>(HCY(0.0, 1.0, Colors::luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
 }

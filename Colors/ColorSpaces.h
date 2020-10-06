@@ -66,7 +66,7 @@ struct HSVBase
 
 	constexpr HSVBase() = default;
 	constexpr HSVBase(float h, float s, float v):hue(h),saturation(s),value(v){};
-	HSVBase(const sRGBBase& rgbf);
+	explicit HSVBase(const sRGBBase& rgbf);
 	operator sRGBBase() const;
 };
 

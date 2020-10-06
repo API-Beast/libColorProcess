@@ -9,7 +9,7 @@ namespace Stats
 
 inline std::array<float, 5> perceptive_factors(LinRGB color)
 {
-	return {luminance709(color), vibrance(color), redness(color), greenness(color), blueness(color)};
+	return {Colors::luminance709(color), Colors::vibrance(color), Colors::redness(color), Colors::greenness(color), Colors::blueness(color)};
 };
 
 constexpr std::array<float, 3> linrgb_factors(LinRGB color)

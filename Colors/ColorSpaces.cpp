@@ -61,7 +61,7 @@ sRGBBase::operator sRGBu8Base() const
 
 HSVBase::operator sRGBBase() const
 {
-	Vec3f saturated = saturate_hue(hue);
+	Vec3f saturated = Colors::saturate_hue(hue);
 	Vec3f gray = Vec3f(1.0f) * (value - (value * saturation));
 	Vec3f sum = saturated * value * saturation + gray;
 	return sRGBBase{sum.x, sum.y, sum.z};
@@ -108,7 +108,7 @@ HCYBase::HCYBase(const LinearRGBBase& rgbf)
 	float minV = std::min({rgbf.red, rgbf.green, rgbf.blue});
 	float maxV = std::max({rgbf.red, rgbf.green, rgbf.blue});
 	chroma = maxV - minV;
-	luminance = luminance709(rgbf);
+	luminance = Colors::luminance709(rgbf);
 
 	if(maxV == 0.0f || chroma == 0.0f)
 		return;
@@ -124,8 +124,8 @@ HCYBase::HCYBase(const LinearRGBBase& rgbf)
 
 HCYBase::operator LinearRGBBase() const
 {
-	Vec3f saturated = saturate_hue(hue) * chroma;
-	float luminance_adjustment = luminance - luminance709(saturated);
+	Vec3f saturated = Colors::saturate_hue(hue) * chroma;
+	float luminance_adjustment = luminance - Colors::luminance709(saturated);
 	Vec3f gray = Vec3f(luminance_adjustment);
 	Vec3f sum = saturated + gray;
 	return LinearRGBBase{sum.x, sum.y, sum.z};
@@ -133,7 +133,7 @@ HCYBase::operator LinearRGBBase() const
 
 std::pair<float, float> HCYBase::get_luminance_limits(float chroma, float hue)
 {
-	float full_chroma_lum = luminance709(saturate_hue(hue));
+	float full_chroma_lum = Colors::luminance709(Colors::saturate_hue(hue));
 	float lower_limit = full_chroma_lum * chroma;
 	float upper_limit = (full_chroma_lum - 1.0) * chroma + 1.0;
 	return std::make_pair(lower_limit, upper_limit);

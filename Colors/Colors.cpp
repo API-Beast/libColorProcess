@@ -9,7 +9,7 @@ constexpr const T& clamp( T v, T lo, T hi )
 }
 }
 
-Vec3f saturate_hue(float hue)
+Vec3f Colors::saturate_hue(float hue)
 {
 	const Vec3f channels{0.0, 2.0 / 3.0, 1.0 / 3.0}; 
 	return Vec3f(
@@ -19,7 +19,7 @@ Vec3f saturate_hue(float hue)
 	);
 }
 
-float hue(Vec3f color)
+float Colors::hue(Vec3f color)
 {
 	float maxV = std::max({color.x, color.y, color.z});
 	float minV = std::min({color.x, color.y, color.z});
@@ -35,9 +35,9 @@ float hue(Vec3f color)
 		return 4.0f / 6.0f + step * (color.x - color.y) / chroma;
 }
 
-float vibrance(LinRGB color)
+float Colors::vibrance(LinRGB color)
 {
-	const float lum = luminance709(color);
+	const float lum = Colors::luminance709(color);
 	color = color.visit([lum](float val){ return (val<lum)?lum:val;});
 	return (color - lum).length(); // Calculate distance
 }
