@@ -53,7 +53,7 @@ std::vector<EntryT> Palette::reduce_using_median_split(const std::vector<EntryT>
 	auto reduce_split = [&micro_splits, max_colors](Split& split)
 	{
 		int iterator_diff = std::distance(split.from, split.to);
-		if((iterator_diff <= 1) || split.axis_difference < (0.05+(1.0 / max_colors))/2.0)
+		if((iterator_diff <= 1))
 		{
 			split.sorted_by_axis = -1;
 			split.axis_difference = -INFINITY;
@@ -102,8 +102,8 @@ std::vector<EntryT> Palette::reduce_using_median_split(const std::vector<EntryT>
 		new_split.from = split_point;
 		find_axis_and_sort(to_split);
 		find_axis_and_sort(new_split);
-		//reduce_split(to_split);
-		//reduce_split(new_split);
+		reduce_split(to_split);
+		reduce_split(new_split);
 		splits.push_back(new_split);
 	}
 
