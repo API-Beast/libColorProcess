@@ -20,11 +20,11 @@ namespace Palette
 	template<typename EntryT, typename Func>
 	ColorPalette<EntryT> sort(const ColorPalette<EntryT>& pal, Func analysis_function, std::initializer_list<int> fixed_indices = {});
 
-	template<typename EntryT, typename Stats, typename Fn>
+	/*template<typename EntryT, typename Stats, typename Fn>
 	EntryT map_color_relative(const ColorPalette<EntryT>& pal, const EntryT& input, const Stats& paletteStats, const Stats& sourceStats, Fn manipulator = nullptr);
 
 	template<typename EntryT>
-	EntryT map_color_absolute(const ColorPalette<EntryT>& pal, const EntryT& input);
+	EntryT map_color_absolute(const ColorPalette<EntryT>& pal, const EntryT& input);*/
 }
 
 template<typename To, typename From>
