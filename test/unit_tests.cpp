@@ -78,7 +78,18 @@ YES_TEST(Colors, Palette_MedianSplit)
 	EXPECT_EQ(entries_in_both, reduced.size());
 }
 
-YES_TEST(Colors, Palette_CONVERSION)
+YES_TEST(Colors, Palette_MedianSplit_EdgeCases)
+{
+	// Edge case 1: All colors are the same or very similar: No axis to split
+	sRGB baseColor = sRGB(0.5);
+	ColorPalette<sRGB> pal(512, baseColor);
+	ColorPalette<sRGB> reduced = Palette::reduce_using_median_split(pal, 32, Stats::perceptive_factors);
+	EXPECT_EQ(pal.size(), 512);
+	EXPECT_EQ(reduced.size(), 32);
+	EXPECT_TRUE(std::all_of(reduced.begin(), reduced.end(), [baseColor](sRGB col){return col == baseColor; }));
+}
+
+YES_TEST(Colors, Palette_Conversion)
 {
 	ColorPalette<HCY> pal(512);
 	std::generate(pal.begin(), pal.end(), random_color);
@@ -112,7 +123,6 @@ YES_TEST(Colors, Palette_Sort)
 	EXPECT_LESS(equal_entries, sorted.size()/10); // Extremely unlikely that more than 10% of entries end up randomly pre-sorted
 	EXPECT_EQ(entries_in_both, sorted.size());
 }
-
 
 YES_TEST(Colors, Functions)
 {
