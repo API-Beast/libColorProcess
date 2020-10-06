@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdio>
 #include <Colors/ColorSpaces.h>
-#include <Colors/Palette.h>
+#include <Palette/Palette.h>
 
 struct HtmlExporter
 {
