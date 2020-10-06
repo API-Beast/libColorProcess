@@ -100,6 +100,19 @@ YES_TEST(Colors, Palette_Conversion)
 	EXPECT_EQ(conversion.back(), colorspace_cast<sRGBu8>(pal.back()));
 }
 
+YES_TEST(Colors, GenericColor)
+{
+	GenericColor color(LinRGB(1.0));
+	EXPECT_EQf(sRGB(color), sRGB(1.0));
+	EXPECT_EQf(sRGBu8(color), sRGBu8(255));
+	EXPECT_EQf(LinRGB(color), LinRGB(1.0));
+	EXPECT_EQf(sHSV(color), sHSV(0.0, 0.0, 1.0));
+	color.convert_to(ColorSpace::sRGBu8);
+	EXPECT_EQf(color.get_vector(), Vec3f(255.0));
+	EXPECT_EQf(sRGB(color), sRGB(1.0));
+	EXPECT_EQf(sRGBu8(color), sRGBu8(255));
+}
+
 YES_TEST(Colors, Palette_Sort)
 {
 	ColorPalette<HCY> pal(512);

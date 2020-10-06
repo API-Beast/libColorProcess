@@ -11,12 +11,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS NO)
 
+set(SOURCE_FILES Colors/Colors.cpp Colors/ColorSpaces.cpp Colors/GenericColor.cpp)
+
 set(HEADER_FILES libColorTool.h)
 list(APPEND HEADER_FILES Palette/Palette.h Palette/Palette_Sort.hpp Palette/Palette_MedianSplit.hpp)
 list(APPEND HEADER_FILES Colors/Stats.h Colors/Colors.h Colors/ColorSpaces.h)
 list(APPEND HEADER_FILES Math/Vector3.h Math/Vector3Mixin.h)
-
-set(SOURCE_FILES Colors/Colors.cpp Colors/ColorSpaces.cpp)
 
 add_library(libColorTool ${SOURCE_FILES} ${HEADER_FILES})
 target_include_directories(libColorTool PUBLIC .)

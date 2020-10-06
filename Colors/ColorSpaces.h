@@ -114,10 +114,10 @@ T colorspace_cast(const P& val)
 	// Direct conversion if possible
 	else if constexpr(std::is_convertible<PBase, TBase>::value)
 		return static_cast<TBase>(PBase(val));
-	else if constexpr(std::is_same<T, LinRGB>::value)
+	else if constexpr(std::is_same<T, LinRGB>::value || std::is_same<T, sRGBu8>::value || std::is_same<T, sHSV>::value)
 		return colorspace_cast<sRGB>(val);
-	else if constexpr(std::is_same<T, sRGBu8>::value)
-		return colorspace_cast<sRGB>(val);
+	else if constexpr(std::is_same<T, LinHSV>::value || std::is_same<T, HCY>::value)
+		return colorspace_cast<LinRGB>(val);
 	else if constexpr(std::is_same<T, sRGB>::value)
 	{
 		if constexpr(std::is_convertible<PBase, LinearRGBBase>::value)
@@ -129,4 +129,14 @@ T colorspace_cast(const P& val)
 	}
 	else
 		return static_cast<TBase>(PBase(val));
+};
+
+enum class ColorSpace
+{
+	LinRGB,
+	sRGB,
+	sRGBu8,
+	sHSV,
+	LinHSV,
+	HCY
 };
