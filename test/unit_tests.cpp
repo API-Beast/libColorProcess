@@ -78,6 +78,13 @@ YES_TEST(Colors, Palette_MedianSplit)
 	EXPECT_EQ(entries_in_both, reduced.size());
 }
 
+YES_TEST(Colors, ColorSpace_Maths)
+{
+	EXPECT_EQf(sRGB(0.5, 0.5, 0.5)*2.0, sRGB(1.0));
+	EXPECT_EQf(LinRGB(0.5, 0.5, 0.5) + sRGB(0.2, 0.2, 0.2), LinRGB(0.5f + sRGB::sRGB_component_to_linear_component(0.2f)));
+	EXPECT_EQf(sRGB(0.5, 0.5, 0.5) + sHSV(0.0, 1.0, 0.5), sRGB(1.0, 0.5, 0.5));
+}
+
 YES_TEST(Colors, Palette_MedianSplit_EdgeCases)
 {
 	// Edge case 1: All colors are the same or very similar: No axis to split
