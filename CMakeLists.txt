@@ -24,7 +24,17 @@ set_target_properties(libColorTool PROPERTIES
 	WINDOWS_EXPORT_ALL_SYMBOLS ON
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-	PREFIX "")
+	PREFIX ""
+	)
+
+# Enable vectorization
+if(CMAKE_COMPILER_IS_GNUCXX)
+	option(LIBCOLORTOOL_VECTORIZE "Try to vectorize all targets linking libColorTool." OFF)
+	if(LIBCOLORTOOL_VECTORIZE)
+		# The "-march=native" is experimental for now, in the future we will use target_clones(...) gcc option to generate SIMD instructions for the targets that make sense.
+		target_compile_options(libColorTool PUBLIC -march=native -ftree-vectorize -ftree-loop-vectorize -fopt-info-vec)
+	endif()
+endif()
 
 install(TARGETS libColorTool)
 
