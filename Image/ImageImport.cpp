@@ -12,7 +12,7 @@ namespace MinPNG
 
 namespace Image
 {
-	ImageData<sRGBAu8> import_png_from_file(const char* filename) 
+	ImageData<sRGB_uint8> import_png_from_file(const char* filename) 
 	{
 		std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
 		std::ifstream::pos_type size = ifs.tellg();
@@ -25,9 +25,9 @@ namespace Image
 		return import_png_from_buffer(buffer.data(), buffer.size());
 	}
 
-	ImageData<sRGBAu8> import_png_from_buffer(const unsigned char* buffer, int buffer_length) 
+	ImageData<sRGB_uint8> import_png_from_buffer(const unsigned char* buffer, int buffer_length) 
 	{
-		ImageData<sRGBAu8> img;
+		ImageData<sRGB_uint8> img;
 		unsigned error;
 
 		spng_ctx* ctx = spng_ctx_new(0);
@@ -40,19 +40,19 @@ namespace Image
 		/* TODO: Handle color space data? */
 
 		size_t size;
-		spng_decoded_image_size(ctx, SPNG_FMT_RGBA8, &size);
-		assert(size == header.width * header.height * sizeof(sRGBAu8));
+		spng_decoded_image_size(ctx, SPNG_FMT_RGB8, &size);
+		assert(size == header.width * header.height * sizeof(sRGB_uint8));
 
 		img.allocate(header.width, header.height);
-		spng_decode_image(ctx, img.data, img.data_length, SPNG_FMT_RGBA8, 0);
+		spng_decode_image(ctx, img.data, img.data_length, SPNG_FMT_RGB8, 0);
 
 		return img;
 	}
 	
-	void export_image_data_to_png_file(const ImageData<sRGBAu8>& img, const char* filename) 
+	void export_image_data_to_png_file(const ImageData<sRGB_uint8>& img, const char* filename) 
 	{
 		FILE *f = fopen(filename, "wb+");
-		MinPNG::buf png = MinPNG::make_png(img.data, img.size.x, img.size.y, sizeof(sRGBAu8), MinPNG::buf_cat_str_argb);
+		MinPNG::buf png = MinPNG::make_png(img.data, img.size.x, img.size.y, sizeof(sRGB_uint8), MinPNG::buf_cat_str_rgb);
 		fwrite(png.data, png.len, 1, f);
 		free(png.data);
 		fclose(f);

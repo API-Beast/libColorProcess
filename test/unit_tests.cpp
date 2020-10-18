@@ -26,18 +26,18 @@ namespace
 
 YES_TEST(Colors, colorspace_cast)
 {
-	LinRGB src(0.0, 0.0, 1.0);
+	LinearRGB src(0.0, 0.0, 1.0);
 	sRGB srgb = colorspace_cast<sRGB>(src);
-	sRGBu8 srgb8 = colorspace_cast<sRGBu8>(src);
-	sHSV shsv = colorspace_cast<sHSV>(src);
-	LinHSV linhsv = colorspace_cast<LinHSV>(src);
+	sRGB_uint8 srgb8 = colorspace_cast<sRGB_uint8>(src);
+	HSV shsv = colorspace_cast<HSV>(src);
+	LinearHSV linhsv = colorspace_cast<LinearHSV>(src);
 	HCY hcy = colorspace_cast<HCY>(src);
 
-	EXPECT_EQf(colorspace_cast<LinRGB>(srgb), src);
-	EXPECT_EQf(colorspace_cast<LinRGB>(srgb8), src);
-	EXPECT_EQf(colorspace_cast<LinRGB>(shsv), src);
-	EXPECT_EQf(colorspace_cast<LinRGB>(linhsv), src);
-	EXPECT_EQf(colorspace_cast<LinRGB>(hcy), src);
+	EXPECT_EQf(colorspace_cast<LinearRGB>(srgb), src);
+	EXPECT_EQf(colorspace_cast<LinearRGB>(srgb8), src);
+	EXPECT_EQf(colorspace_cast<LinearRGB>(shsv), src);
+	EXPECT_EQf(colorspace_cast<LinearRGB>(linhsv), src);
+	EXPECT_EQf(colorspace_cast<LinearRGB>(hcy), src);
 	PRINT_INFO(srgb);
 	PRINT_INFO(srgb8);
 	PRINT_INFO(shsv);
@@ -65,13 +65,6 @@ YES_TEST(Colors, Palette_MedianSplit)
 	EXPECT_EQ(entries_in_both, reduced.size());
 }
 
-YES_TEST(Colors, ColorSpace_Maths)
-{
-	EXPECT_EQf(sRGB(0.5, 0.5, 0.5)*2.0, sRGB(1.0));
-	EXPECT_EQf(LinRGB(0.5, 0.5, 0.5) + sRGB(0.2, 0.2, 0.2), LinRGB(0.5f + sRGB::sRGB_component_to_linear_component(0.2f)));
-	EXPECT_EQf(sRGB(0.5, 0.5, 0.5) + sHSV(0.0, 1.0, 0.5), sRGB(1.0, 0.5, 0.5));
-}
-
 YES_TEST(Colors, Palette_MedianSplit_EdgeCases)
 {
 	// Edge case 1: All colors are the same or very similar: No axis to split
@@ -87,24 +80,24 @@ YES_TEST(Colors, Palette_Conversion)
 {
 	ColorPalette<HCY> pal(512);
 	std::generate(pal.begin(), pal.end(), random_color);
-	ColorPalette<sRGBu8> conversion = Palette::convert<sRGBu8>(pal);
+	ColorPalette<sRGB_uint8> conversion = Palette::convert<sRGB_uint8>(pal);
 
 	EXPECT_EQ(conversion.size(), pal.size());
-	EXPECT_EQ(conversion[0], colorspace_cast<sRGBu8>(pal[0]));
-	EXPECT_EQ(conversion.back(), colorspace_cast<sRGBu8>(pal.back()));
+	EXPECT_EQ(conversion[0], colorspace_cast<sRGB_uint8>(pal[0]));
+	EXPECT_EQ(conversion.back(), colorspace_cast<sRGB_uint8>(pal.back()));
 }
 
 YES_TEST(Colors, GenericColor)
 {
-	GenericColor color(LinRGB(1.0));
+	GenericColor color(LinearRGB(1.0));
 	EXPECT_EQf(sRGB(color), sRGB(1.0));
-	EXPECT_EQf(sRGBu8(color), sRGBu8(255));
-	EXPECT_EQf(LinRGB(color), LinRGB(1.0));
-	EXPECT_EQf(sHSV(color), sHSV(0.0, 0.0, 1.0));
-	color.convert_to(ColorSpace::sRGBu8);
+	EXPECT_EQf(sRGB_uint8(color), sRGB_uint8(255));
+	EXPECT_EQf(LinearRGB(color), LinearRGB(1.0));
+	EXPECT_EQf(HSV(color), HSV(0.0, 0.0, 1.0));
+	color.convert_to(ColorSpace::sRGB_uint8);
 	EXPECT_EQf(color.get_vector(), Vec3f(255.0));
 	EXPECT_EQf(sRGB(color), sRGB(1.0));
-	EXPECT_EQf(sRGBu8(color), sRGBu8(255));
+	EXPECT_EQf(sRGB_uint8(color), sRGB_uint8(255));
 }
 
 YES_TEST(Colors, Palette_Sort)
@@ -166,19 +159,19 @@ YES_TEST(Math, Vec3f)
 
 YES_TEST(Colors, ImplicitConversion)
 {
-	LinRGB a(0.5, 0.5, 0.5);
+	LinearRGB a(0.5, 0.5, 0.5);
 	sRGB b = a;
-	LinRGB c = b;
+	LinearRGB c = b;
 	EXPECT_EQf(Colors::luminance709(a), Colors::luminance709(b));
 	EXPECT_EQf(Colors::luminance709(a), Colors::luminance709(c));
-	EXPECT_EQf((a+b).red, a.red + sRGB::sRGB_component_to_linear_component(b.red));
+	//EXPECT_EQf((a+b).red, a.red + Colors::component_sRGB_to_linear(b.red));
 	//static_assert(std::is_same<decltype(a+b), decltype(a)>::value, "Operators have wrong result type");
 }
 
-YES_TEST(Colors, sRGBu8)
+YES_TEST(Colors, sRGB_uint8)
 {
 	sRGB f(0.0f, 0.5f, 1.0f);
-	sRGBu8 u8 = f;
+	sRGB_uint8 u8 = f;
 	EXPECT_EQ(u8.red,     0);
 	EXPECT_EQ(u8.green, 127);
 	EXPECT_EQ(u8.blue,  255);
@@ -192,57 +185,57 @@ YES_TEST(Colors, sRGBu8)
 YES_TEST(Colors, HSV_Conversions)
 {
 	sRGB d(0.5, 0.5, 0.5);
-	sHSV e = d;
+	HSV e = d;
 	sRGB f = e;
 	EXPECT_EQ(d, f);
 	PRINT_INFO(e);
 
-	LinRGB a(0.5, 0.5, 0.5);
-	LinHSV b = a;
-	LinRGB c = b;
+	LinearRGB a(0.5, 0.5, 0.5);
+	LinearHSV b = a;
+	LinearRGB c = b;
 	EXPECT_EQ(a, c);
 	PRINT_INFO(b);
 }
 
 YES_TEST(Colors, HSV)
 {
-	LinRGB red(1.0, 0.0, 0.0);
-	LinHSV red_hsv(red);
+	LinearRGB red(1.0, 0.0, 0.0);
+	LinearHSV red_hsv(red);
 	EXPECT_EQ(red_hsv.hue, 0.0f);
 	EXPECT_EQ(red_hsv.saturation, 1.0f);
 	EXPECT_EQf(Colors::luminance709(red_hsv), Colors::luminance709(red));
-	EXPECT_EQf(LinRGB(red_hsv), red);
+	EXPECT_EQf(LinearRGB(red_hsv), red);
 
-	LinRGB green(0.0, 1.0, 0.0);
-	LinHSV green_hsv(green);
+	LinearRGB green(0.0, 1.0, 0.0);
+	LinearHSV green_hsv(green);
 	EXPECT_EQf(green_hsv.hue, 1.0f / 3.0f);
 	EXPECT_EQ(green_hsv.saturation, 1.0f);
 	EXPECT_EQf(Colors::luminance709(green_hsv), Colors::luminance709(green));
-	EXPECT_EQf(LinRGB(green_hsv), green);
+	EXPECT_EQf(LinearRGB(green_hsv), green);
 
-	LinRGB blue(0.0, 0.0, 1.0);
-	LinHSV blue_hsv(blue);
+	LinearRGB blue(0.0, 0.0, 1.0);
+	LinearHSV blue_hsv(blue);
 	EXPECT_EQf(blue_hsv.hue, 2.0f / 3.0f);
 	EXPECT_EQ(blue_hsv.saturation, 1.0f);
 	EXPECT_EQf(Colors::luminance709(blue_hsv), Colors::luminance709(blue));
-	EXPECT_EQf(LinRGB(blue_hsv), blue);
+	EXPECT_EQf(LinearRGB(blue_hsv), blue);
 }
 
 YES_TEST(Colors, LinRGB_to_HCY)
 {
-	LinRGB red(1.0, 0.0, 0.0);
+	LinearRGB red(1.0, 0.0, 0.0);
 	HCY red_hcy(red);
 	EXPECT_EQ(red_hcy.hue, 0.0f);
 	EXPECT_EQ(red_hcy.chroma, 1.0f);
 	EXPECT_EQf(red_hcy.luminance, Colors::luminance709(red));
 
-	LinRGB green(0.0, 1.0, 0.0);
+	LinearRGB green(0.0, 1.0, 0.0);
 	HCY green_hcy(green);
 	EXPECT_EQf(green_hcy.hue, 1.0f / 3.0f);
 	EXPECT_EQ(green_hcy.chroma, 1.0f);
 	EXPECT_EQf(green_hcy.luminance, Colors::luminance709(green));
 
-	LinRGB blue(0.0, 0.0, 1.0);
+	LinearRGB blue(0.0, 0.0, 1.0);
 	HCY blue_hcy(blue);
 	EXPECT_EQf(blue_hcy.hue, 2.0f / 3.0f);
 	EXPECT_EQ(blue_hcy.chroma, 1.0f);
@@ -251,5 +244,5 @@ YES_TEST(Colors, LinRGB_to_HCY)
 
 YES_TEST(Colors, HCY_to_LinRGB)
 {
-	EXPECT_EQf(colorspace_cast<LinRGB>(HCY(0.0, 1.0, Colors::luminance709(LinRGB(1.0, 0.0, 0.0)))), LinRGB(1.0, 0.0, 0.0));
+	EXPECT_EQf(colorspace_cast<LinearRGB>(HCY(0.0, 1.0, Colors::luminance709(LinearRGB(1.0, 0.0, 0.0)))), LinearRGB(1.0, 0.0, 0.0));
 }

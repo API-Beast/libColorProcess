@@ -18,7 +18,7 @@ struct HtmlExporter
 		fprintf(file, "<div class=\"palette\">\n");
 		for(T entry : pal)
 		{
-			sRGBu8 rgb = colorspace_cast<sRGBu8>(entry);
+			sRGB_uint8 rgb = colorspace_cast<sRGB_uint8>(entry);
 			fprintf(file, "<span class=\"entry\" style=\"background-color:rgb(%u, %u, %u);\"></span>", rgb.red, rgb.green, rgb.blue);
 			fflush(file);
 		}

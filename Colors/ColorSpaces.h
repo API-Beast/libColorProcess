@@ -6,137 +6,137 @@
 #include <utility>
 #include <iostream>
 
-struct LinearRGBBase;
-struct sRGBBase;
-struct sRGBu8Base;
-struct sHSVBase;
-struct LinearHSVBase;
-struct HCYBase;
+struct LinearRGB;
+struct sRGB;
+struct sRGB_uint8;
+struct HSV;
+struct LinearHSV;
+struct HCY;
 
-struct LinearRGBBase
+struct LinearRGB
 {
 	float red = 0.0;
 	float green = 0.0;
 	float blue = 0.0;
 
-	constexpr LinearRGBBase() = default;
-	constexpr LinearRGBBase(float r, float g, float b):red(r),green(g),blue(b){};
-	constexpr LinearRGBBase(const Vector3Base<float>& vec):red(vec.x),green(vec.y),blue(vec.z){};
-	operator sRGBBase() const;
-
-	static constexpr float linear_component_to_sRGB_component(float val)
-	{
-		return val > 0.0031308 ? (1.055 * pow(val, 1.0/2.4)) - 0.055 : 12.92 * val;
-	};
-};
-
-struct sRGBBase
-{
-	float red = 0.0;
-	float green = 0.0;
-	float blue = 0.0;
-
-	operator LinearRGBBase() const;
-	operator sRGBu8Base() const;
+	constexpr LinearRGB(const Vec3f& vec):red(vec.x),green(vec.y),blue(vec.z){};
 	
-	static constexpr float sRGB_component_to_linear_component(float val)
-	{
-		if(val > 0.04045)
-			return pow((val + 0.055) / 1.055, 2.4);
-		else
-			return val / 12.92;
-	};
-};
+	operator sRGB() const;
 
-struct sRGBu8Base
+	VECTOR3_CONSTRUCTORS(LinearRGB, red, green, blue);
+	VECTOR3_MEMBER_FUNCTIONS(LinearRGB, red, green, blue);
+};
+VECTOR3_OPERATORS(LinearRGB, red, green, blue);
+VECTOR3_FUNCTIONS(LinearRGB, red, green, blue);
+
+struct sRGB
+{
+	float red = 0.0;
+	float green = 0.0;
+	float blue = 0.0;
+
+	operator LinearRGB() const;
+	operator sRGB_uint8() const;
+
+	VECTOR3_CONSTRUCTORS(sRGB, red, green, blue);
+	VECTOR3_MEMBER_FUNCTIONS(sRGB, red, green, blue);
+};
+VECTOR3_OPERATORS(sRGB, red, green, blue);
+VECTOR3_FUNCTIONS(sRGB, red, green, blue);
+
+struct sRGB_uint8
 {
 	uint8_t red = 0;
 	uint8_t green = 0;
 	uint8_t blue = 0;
 
-	operator sRGBBase() const;
+	operator sRGB() const;
 	uint32_t to_int();
-};
 
-struct HSVBase
+	VECTOR3_CONSTRUCTORS(sRGB_uint8, red, green, blue);
+	VECTOR3_MEMBER_FUNCTIONS(sRGB_uint8, red, green, blue);
+};
+VECTOR3_OPERATORS(sRGB_uint8, red, green, blue);
+VECTOR3_FUNCTIONS(sRGB_uint8, red, green, blue);
+
+struct HSV
 {
 	float hue = 0.0;
 	float saturation = 0.0;
 	float value = 0.0;
 
-	constexpr HSVBase() = default;
-	constexpr HSVBase(float h, float s, float v):hue(h),saturation(s),value(v){};
-	explicit HSVBase(const sRGBBase& rgbf);
-	operator sRGBBase() const;
-};
+	HSV(const sRGB& rgbf);
+	operator sRGB() const;
 
-struct LinearHSVBase
+	VECTOR3_CONSTRUCTORS(HSV, hue, saturation, value);
+	VECTOR3_MEMBER_FUNCTIONS(HSV, hue, saturation, value);
+};
+VECTOR3_OPERATORS(HSV, hue, saturation, value);
+VECTOR3_FUNCTIONS(HSV, hue, saturation, value);
+
+struct LinearHSV
 {
 	float hue = 0.0;
 	float saturation = 0.0;
 	float value = 0.0;
 
-	constexpr LinearHSVBase() = default;
-	constexpr LinearHSVBase(float h, float s, float v):hue(h),saturation(s),value(v){};
-	explicit LinearHSVBase(const LinearRGBBase& rgbf);
-	operator LinearRGBBase() const;
-};
+	LinearHSV(const LinearRGB& rgbf);
+	operator LinearRGB() const;
 
-struct HCYBase
+	VECTOR3_CONSTRUCTORS(LinearHSV, hue, saturation, value);
+	VECTOR3_MEMBER_FUNCTIONS(LinearHSV, hue, saturation, value);
+};
+VECTOR3_OPERATORS(LinearHSV, hue, saturation, value);
+VECTOR3_FUNCTIONS(LinearHSV, hue, saturation, value);
+
+struct HCY
 {
 	float hue = 0.0;
 	float chroma = 0.0;
 	float luminance = 0.0;
 
-	constexpr HCYBase() = default;
-	explicit HCYBase(const LinearRGBBase& rgbf);
-	operator LinearRGBBase() const;
+	HCY(const LinearRGB& rgbf);
+	operator LinearRGB() const;
 
 	static std::pair<float, float> get_luminance_limits(float chroma, float hue);
+
+	VECTOR3_CONSTRUCTORS(HCY, hue, chroma, luminance);
+	VECTOR3_MEMBER_FUNCTIONS(HCY, hue, chroma, luminance);
 };
-
-using LinRGB = Vector3Mixin<LinearRGBBase, &LinearRGBBase::red, &LinearRGBBase::green,      &LinearRGBBase::blue >;
-using LinHSV = Vector3Mixin<LinearHSVBase, &LinearHSVBase::hue, &LinearHSVBase::saturation, &LinearHSVBase::value>;
-using HCY    = Vector3Mixin<HCYBase,       &HCYBase::hue,       &HCYBase::chroma,           &HCYBase::luminance  >;
-
-using sRGB   = Vector3Mixin<sRGBBase,   &sRGBBase::red,   &sRGBBase::green,      &sRGBBase::blue  >;
-using sRGBu8 = Vector3Mixin<sRGBu8Base, &sRGBu8Base::red, &sRGBu8Base::green,    &sRGBu8Base::blue>;
-using sHSV   = Vector3Mixin<HSVBase,    &HSVBase::hue,    &HSVBase::saturation,  &HSVBase::value >;
+VECTOR3_OPERATORS(HCY, hue, chroma, luminance);
+VECTOR3_FUNCTIONS(HCY, hue, chroma, luminance);
 
 template<typename T, typename P>
 T colorspace_cast(const P& val)
 {
-	// We expect all T's and P's to be Vector3Mixins
-	using TBase = typename T::BaseType;
-	using PBase = typename P::BaseType;
 	if constexpr(std::is_same<T, P>::value)
 		return val;
 	// Direct conversion if possible
-	else if constexpr(std::is_convertible<PBase, TBase>::value)
-		return static_cast<TBase>(PBase(val));
-	else if constexpr(std::is_same<T, LinRGB>::value || std::is_same<T, sRGBu8>::value || std::is_same<T, sHSV>::value)
+	else if constexpr(std::is_convertible<P, T>::value)
+		return static_cast<T>(P(val));
+	else if constexpr(std::is_same<T, LinearRGB>::value || std::is_same<T, sRGB_uint8>::value || std::is_same<T, HSV>::value)
 		return colorspace_cast<sRGB>(val);
-	else if constexpr(std::is_same<T, LinHSV>::value || std::is_same<T, HCY>::value)
-		return colorspace_cast<LinRGB>(val);
+	else if constexpr(std::is_same<T, LinearHSV>::value || std::is_same<T, HCY>::value)
+		return colorspace_cast<LinearRGB>(val);
 	else if constexpr(std::is_same<T, sRGB>::value)
 	{
-		if constexpr(std::is_convertible<PBase, LinearRGBBase>::value)
-			return colorspace_cast<LinRGB>(val);
-		else if constexpr(std::is_convertible<PBase, sRGBu8Base>::value)
-			return colorspace_cast<sRGBu8>(val);
+		if constexpr(std::is_convertible<P, LinearRGB>::value)
+			return colorspace_cast<LinearRGB>(val);
+		else if constexpr(std::is_convertible<P, sRGB_uint8>::value)
+			return colorspace_cast<sRGB_uint8>(val);
 		else
-			return static_cast<TBase>(PBase(val));
+			return static_cast<T>(P(val));
 	}
 	else
-		return static_cast<TBase>(PBase(val));
+		return static_cast<T>(P(val));
 };
 
 enum class ColorSpace
 {
-	LinRGB,
+	LinearRGB,
 	sRGB,
-	sRGBu8,
-	sHSV,
-	LinHSV,
+	sRGB_uint8,
+	HSV,
+	LinearHSV,
 	HCY
 };

@@ -1,17 +1,18 @@
 #pragma once
 #include "yestest.h"
-#include "../Math/Vector3Mixin.h"
+#include "../Math/Vector3.h"
 #include "../Math/Vector2.h"
+#include <algorithm>
 
 namespace YesTest
 {
-	template<typename T, auto X, auto Y, auto Z>
-	void print_value(Vector3Mixin<T,X,Y,Z> f) { print_value(f.*X, f.*Y, f.*Z); }
+	template<typename T>
+	typename std::enable_if<T::is_vector_type, void>::type print_value(T f) { f.for_each([](auto v){ print_value(v); }); }
 
-	template<typename T, auto X, auto Y, auto Z>
-	inline int ulp_difference(Vector3Mixin<T,X,Y,Z> a, Vector3Mixin<T,X,Y,Z> b)
+	template<typename T>
+	inline typename std::enable_if<T::is_vector_type, int>::type ulp_difference(T a, T b)
 	{
-		return std::max({ulp_difference(a.*X, b.*X), ulp_difference(a.*Y, b.*Y), ulp_difference(a.*Z, b.*Z)});
+		return std::max({ulp_difference(a.get_x(), b.get_x()), ulp_difference(a.get_y(), b.get_y()), ulp_difference(a.get_z(), b.get_z())});
 	}
 
 	template<typename T>

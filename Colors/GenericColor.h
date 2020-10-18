@@ -7,25 +7,25 @@ class GenericColor
 protected:
 	union
 	{
-		LinRGB linRgb;
+		LinearRGB linRgb;
 		sRGB sRgb;
-		sRGBu8 sRgbu8;
-		sHSV sHsv;
-		LinHSV linHsv;
+		sRGB_uint8 sRgbu8;
+		HSV Hsv;
+		LinearHSV linHsv;
 		HCY hcy;
 		Vec3f genericVec3f;
 		Vec3u8 genericVec3u8;
 	};
-	ColorSpace color_space = ColorSpace::LinRGB;
+	ColorSpace color_space = ColorSpace::LinearRGB;
 
 public:
-	constexpr GenericColor():linRgb(1.0, 1.0, 1.0), color_space(ColorSpace::LinRGB){};
-	constexpr GenericColor(LinRGB rgb):linRgb(rgb), color_space(ColorSpace::LinRGB){};
+	constexpr GenericColor():linRgb(1.0, 1.0, 1.0), color_space(ColorSpace::LinearRGB){};
+	constexpr GenericColor(LinearRGB rgb):linRgb(rgb), color_space(ColorSpace::LinearRGB){};
 	constexpr GenericColor(sRGB rgb):sRgb(rgb), color_space(ColorSpace::sRGB){};
-	constexpr GenericColor(sRGBu8 rgb):sRgbu8(rgb), color_space(ColorSpace::sRGBu8){};
-	constexpr GenericColor(sHSV hsv):sHsv(hsv), color_space(ColorSpace::sHSV){};
-	constexpr GenericColor(LinHSV hsv):linHsv(hsv), color_space(ColorSpace::LinHSV){};
-	constexpr GenericColor(HCY hcy):linHsv(hcy), color_space(ColorSpace::HCY){};
+	constexpr GenericColor(sRGB_uint8 rgb):sRgbu8(rgb), color_space(ColorSpace::sRGB_uint8){};
+	constexpr GenericColor(HSV hsv):Hsv(hsv), color_space(ColorSpace::HSV){};
+	constexpr GenericColor(LinearHSV hsv):linHsv(hsv), color_space(ColorSpace::LinearHSV){};
+	constexpr GenericColor(HCY hcy):hcy(hcy), color_space(ColorSpace::HCY){};
 
 	GenericColor(Vec3f generic, ColorSpace p_space);
 
@@ -42,15 +42,15 @@ GenericColor::operator T()
 {
 	switch(color_space)
 	{
-		case ColorSpace::LinRGB:
+		case ColorSpace::LinearRGB:
 			return colorspace_cast<T>(linRgb);
 		case ColorSpace::sRGB:
 			return colorspace_cast<T>(sRgb);
-		case ColorSpace::sRGBu8:
+		case ColorSpace::sRGB_uint8:
 			return colorspace_cast<T>(sRgbu8);
-		case ColorSpace::sHSV:
-			return colorspace_cast<T>(sHsv);
-		case ColorSpace::LinHSV:
+		case ColorSpace::HSV:
+			return colorspace_cast<T>(Hsv);
+		case ColorSpace::LinearHSV:
 			return colorspace_cast<T>(linHsv);
 		case ColorSpace::HCY:
 			return colorspace_cast<T>(hcy);

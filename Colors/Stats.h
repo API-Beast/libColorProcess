@@ -7,12 +7,12 @@
 namespace Stats
 {
 
-inline std::array<float, 5> perceptive_factors(LinRGB color)
+inline std::array<float, 5> perceptive_factors(LinearRGB color)
 {
 	return {Colors::luminance709(color), Colors::vibrance(color), Colors::redness(color), Colors::greenness(color), Colors::blueness(color)};
 };
 
-constexpr std::array<float, 3> linrgb_factors(LinRGB color)
+constexpr std::array<float, 3> linrgb_factors(LinearRGB color)
 {
 	return {color.red, color.green, color.blue};
 };

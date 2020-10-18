@@ -1,8 +1,8 @@
 # libColorTool
 
-Work in progress. The library itself is fully functional, but the documentation still needs to be written.
+Work in progress.
 
-For now here is a rough outline of what the final documentation will contain.
+For now here is a rough outline of what the documentation should mention.
 
 ## Color space classes
 ```cpp
@@ -12,12 +12,12 @@ For now here is a rough outline of what the final documentation will contain.
 ```cpp
 // float based
 sRGB
-sHSV
-LinRGB
-LinHSV
+HSV
+LinearRGB
+LinearHSV
 HCY
 // uint8_t based
-sRGBu8
+sRGB_uint8
 ```
 
 All color space classes are 3 dimensional vectors and have operator overloads. (Similar to how colors are handled in GLSL.)
@@ -29,18 +29,15 @@ sRGB(0.5, 0.5, 0.5) * 2.0;
 // Result is sRGB(1.0, 1.0, 1.0)
 ```
 
-Simple conversions are implicit. (LinRGB to sRGB, sRGB to LinRGB, sRGB to sRGBu8, sRGBu8 to sRGB, sHSV to sRGB, LinHSV to LinRGB, HCY to LinRGB)
+Simple conversions are implicit. (LinearRGB to sRGB, sRGB to LinearRGB, sRGB to sRGB_uint8, sRGB_uint8 to sRGB, HSV to sRGB, LinearHSV to LinearRGB, HCY to LinearRGB)
 
 ```cpp
-LinRGB(0.5, 0.5, 0.5) + sRGB(0.2, 0.2, 0.2);
-// Result is LinRGB(0.53333)
-sRGB(0.5, 0.5, 0.5) + sHSV(0.0, 1.0, 0.5);
-// Result is sRGB(1.0, 0.5, 0.5)
+LinearRGB val = sRGB(0.5, 0.5, 0.5);
 ```
 
 All colorspace types can be converted using colorspace_cast.
 ```cpp
-sHSV result = colorspace_cast<sHSV>(LinRGB(1.0, 0.0, 0.0));
+HSV result = colorspace_cast<HSV>(LinearRGB(1.0, 0.0, 0.0));
 ```
 
 ### Color functions
@@ -53,15 +50,15 @@ sHSV result = colorspace_cast<sHSV>(LinRGB(1.0, 0.0, 0.0));
 namespace Colors
 {
 
-constexpr float redness(LinRGB color); // Red - (Blue + Green) / 2.0
-constexpr float greenness(LinRGB color); // Green - (Blue + Red) / 2.0
-constexpr float blueness(LinRGB color); // Blue - (Green + Red) / 2.0
-constexpr float luminance709(LinRGB color); // Luminance after Rec. 709 standard
-constexpr float chroma(LinRGB rgbf); // Value of saturated component of color
+constexpr float redness(LinearRGB color); // Red - (Blue + Green) / 2.0
+constexpr float greenness(LinearRGB color); // Green - (Blue + Red) / 2.0
+constexpr float blueness(LinearRGB color); // Blue - (Green + Red) / 2.0
+constexpr float luminance709(LinearRGB color); // Luminance after Rec. 709 standard
+constexpr float chroma(LinearRGB rgbf); // Value of saturated component of color
 constexpr float chroma(sRGB rgbf); // Also available for sRGB colors
 Vec3f saturate_hue(float hue); // Creates a fully saturated generic vector from a hue.
 float hue(Vec3f color); // Gets the hue of a generic vector.
-float vibrance(LinRGB color); // Distance between the color and a gray of equal luminance, subjectively perceived as vibrance.
+float vibrance(LinearRGB color); // Distance between the color and a gray of equal luminance, subjectively perceived as vibrance.
 
 }
 ```
@@ -82,7 +79,7 @@ Stats functions are functions that analyze a color and return a array of all fac
 |                           |      [0]     |      [1]     |     [2]     |    [3]    |    [4]   |
 |---------------------------|:------------:|:------------:|:-----------:|:---------:|:--------:|
 | Stats::perceptive_factors | luminance709 |   vibrance   |   redness   | greenness | blueness |
-| Stats::linrgb_factors     |  LinRGB red  | LinRGB green | LinRGB blue |           |          |
+| Stats::linrgb_factors     |  LinearRGB red  | LinearRGB green | LinearRGB blue |           |          |
 | Stats::srgb_factors       |   sRGB red   |  sRGB green  |  sRGB blue  |           |          |
 
 Perceptive factors are the factors used by ColorTool. sRGB factors are the ones used in most graphics applications such as GIMP or Photoshop.

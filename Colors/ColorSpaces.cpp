@@ -4,33 +4,22 @@
 #include <algorithm>
 #include <iostream>
 
-namespace
+LinearRGB::operator sRGB() const
 {
-
-template<class T>
-constexpr const T& clamp( T v, T lo, T hi )
-{
-	return (v < lo) ? lo : (hi < v) ? hi : v;
-}
-
-}
-
-LinearRGBBase::operator sRGBBase() const
-{
-	return {linear_component_to_sRGB_component(red), linear_component_to_sRGB_component(green), linear_component_to_sRGB_component(blue)};
+	return visit(&Colors::component_linear_to_sRGB);
 };
 
-sRGBBase::operator LinearRGBBase() const
+sRGB::operator LinearRGB() const
 {
-	return {sRGB_component_to_linear_component(red), sRGB_component_to_linear_component(green), sRGB_component_to_linear_component(blue)};
+	return visit(&Colors::component_sRGB_to_linear);
 };
 
-sRGBu8Base::operator sRGBBase() const
+sRGB_uint8::operator sRGB() const
 {
 	return {red / float(UINT8_MAX), green / float(UINT8_MAX), blue / float(UINT8_MAX)};
 };
 
-uint32_t sRGBu8Base::to_int() 
+uint32_t sRGB_uint8::to_int() 
 {
 	union Conv
 	{
@@ -43,7 +32,7 @@ uint32_t sRGBu8Base::to_int()
 		} col;
 		uint32_t integer;
 
-		Conv(sRGBu8Base p):integer(UINT32_MAX)
+		Conv(sRGB_uint8 p):integer(UINT32_MAX)
 		{
 			col.red = p.red;
 			col.blue = p.blue;
@@ -54,20 +43,20 @@ uint32_t sRGBu8Base::to_int()
 	return c.integer;
 };
 
-sRGBBase::operator sRGBu8Base() const
+sRGB::operator sRGB_uint8() const
 {
 	return {uint8_t(red * UINT8_MAX), uint8_t(green * UINT8_MAX), uint8_t(blue * UINT8_MAX)};
 };
 
-HSVBase::operator sRGBBase() const
+HSV::operator sRGB() const
 {
 	Vec3f saturated = Colors::saturate_hue(hue);
 	Vec3f gray = Vec3f(1.0f) * (value - (value * saturation));
 	Vec3f sum = saturated * value * saturation + gray;
-	return sRGBBase{sum.x, sum.y, sum.z};
+	return sRGB{sum.x, sum.y, sum.z};
 }
 
-HSVBase::HSVBase(const sRGBBase& rgbf)
+HSV::HSV(const sRGB& rgbf)
 {
 	float minV = std::min(rgbf.red, std::min(rgbf.green, rgbf.blue));
 	float maxV = std::max(rgbf.red, std::max(rgbf.green, rgbf.blue));
@@ -88,22 +77,22 @@ HSVBase::HSVBase(const sRGBBase& rgbf)
 		hue = 4.0 / 6.0 + step * (rgbf.red - rgbf.green) / deltaV;
 }
 
-LinearHSVBase::operator LinearRGBBase() const
+LinearHSV::operator LinearRGB() const
 {
-	HSVBase hsv{hue, saturation, value};
-	sRGBBase rgb = hsv;
+	HSV hsv{hue, saturation, value};
+	sRGB rgb = hsv;
 	return {rgb.red, rgb.green, rgb.blue};
 }
 
-LinearHSVBase::LinearHSVBase(const LinearRGBBase& rgbf)
+LinearHSV::LinearHSV(const LinearRGB& rgbf)
 {
-	HSVBase hsv(sRGBBase{rgbf.red, rgbf.green, rgbf.blue});
+	HSV hsv(sRGB{rgbf.red, rgbf.green, rgbf.blue});
 	hue = hsv.hue;
 	saturation = hsv.saturation;
 	value = hsv.value;
 }
 
-HCYBase::HCYBase(const LinearRGBBase& rgbf)
+HCY::HCY(const LinearRGB& rgbf)
 {
 	float minV = std::min({rgbf.red, rgbf.green, rgbf.blue});
 	float maxV = std::max({rgbf.red, rgbf.green, rgbf.blue});
@@ -122,16 +111,16 @@ HCYBase::HCYBase(const LinearRGBBase& rgbf)
 		hue = 4.0 / 6.0 + step * (rgbf.red - rgbf.green) / chroma;
 }
 
-HCYBase::operator LinearRGBBase() const
+HCY::operator LinearRGB() const
 {
 	Vec3f saturated = Colors::saturate_hue(hue) * chroma;
 	float luminance_adjustment = luminance - Colors::luminance709(saturated);
 	Vec3f gray = Vec3f(luminance_adjustment);
 	Vec3f sum = saturated + gray;
-	return LinearRGBBase{sum.x, sum.y, sum.z};
+	return LinearRGB{sum.x, sum.y, sum.z};
 }
 
-std::pair<float, float> HCYBase::get_luminance_limits(float chroma, float hue)
+std::pair<float, float> HCY::get_luminance_limits(float chroma, float hue)
 {
 	float full_chroma_lum = Colors::luminance709(Colors::saturate_hue(hue));
 	float lower_limit = full_chroma_lum * chroma;

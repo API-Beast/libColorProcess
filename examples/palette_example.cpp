@@ -42,13 +42,13 @@ ColorPalette<sRGB> import_gpl_file(const char* filename)
 		if(input.peek() == '\n') // Empty lines
 			continue;
 
-		Vec3<int32_t> color;
+		Vector3<int32_t> color;
 		input >> std::skipws;
 		input >> color.x >> color.y >> color.z;
 		input >> std::noskipws;
 		input.ignore(1024, '\n'); // Ignore the rest of the line
 		input.ignore(1);
-		palette.push_back(sRGBu8{uint8_t(color.x), uint8_t(color.y), uint8_t(color.z)});
+		palette.push_back(sRGB_uint8{uint8_t(color.x), uint8_t(color.y), uint8_t(color.z)});
 	}
 	return palette;
 };
