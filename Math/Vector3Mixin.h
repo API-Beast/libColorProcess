@@ -72,4 +72,4 @@ def_assign_operator(-=);
 def_assign_operator(/=);
 def_assign_operator(*=);
 def_assign_operator(%=);
-#undef def_operator
+#undef def_assign_operator

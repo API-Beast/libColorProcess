@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(libColorTool LANGUAGES CXX)
+project(libColorTool LANGUAGES CXX C)
 
 # This is an internal CMake variable, we just expose it to the GUI.
 # It affects all library that have no type (e.g. no SHARED or STATIC)
@@ -8,10 +8,12 @@ option(BUILD_SHARED_LIBS "Build libColorTool as shared library" OFF)
 
 # We are using the project global variables instead of target properties so it applies to the tests too
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS NO)
 
 set(SOURCE_FILES Colors/Colors.cpp Colors/ColorSpaces.cpp Colors/GenericColor.cpp)
+list(APPEND SOURCE_FILES Image/ImageData.cpp Image/ImageImport.cpp Image/dependencies/spng.c Image/dependencies/miniz.c)
 
 set(HEADER_FILES libColorTool.h)
 list(APPEND HEADER_FILES Palette/Palette.h Palette/Palette_Sort.hpp Palette/Palette_MedianSplit.hpp)
@@ -19,7 +21,7 @@ list(APPEND HEADER_FILES Colors/Stats.h Colors/Colors.h Colors/ColorSpaces.h)
 list(APPEND HEADER_FILES Math/Vector3.h Math/Vector3Mixin.h)
 
 add_library(libColorTool ${SOURCE_FILES} ${HEADER_FILES})
-target_include_directories(libColorTool PUBLIC .)
+target_include_directories(libColorTool PUBLIC . Image/dependencies/)
 set_target_properties(libColorTool PROPERTIES
 	WINDOWS_EXPORT_ALL_SYMBOLS ON
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin

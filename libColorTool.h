@@ -7,3 +7,5 @@
 #include "Palette/Palette.h"
 #include "Math/Vector3.h"
 #include "Math/Vector3Mixin.h"
+#include "Image/ImageData.h"
+#include "Image/ImageImport.h"
