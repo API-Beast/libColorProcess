@@ -14,7 +14,11 @@ constexpr const T& clamp( T v, T lo, T hi )
 Vec3f Colors::saturate_hue(float hue)
 {
 	const Vec3f channels{0.0, 2.0 / 3.0, 1.0 / 3.0}; 
-	return clamp(abs(fmod(channels + hue, 1.0) * 6.0f - 3.0f), 0.0f, 1.0f);
+	return Vec3f(
+		clamp<float>(std::abs(std::fmod(hue + channels.x, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0),
+		clamp<float>(std::abs(std::fmod(hue + channels.y, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0),
+		clamp<float>(std::abs(std::fmod(hue + channels.z, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0)
+	);
 }
 
 float Colors::hue(Vec3f color)
