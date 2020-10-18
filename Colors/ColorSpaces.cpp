@@ -6,12 +6,12 @@
 
 LinearRGB::operator sRGB() const
 {
-	return visit(&Colors::component_linear_to_sRGB);
+	return sRGB(red, green, blue).visit(&Colors::component_linear_to_sRGB);
 };
 
 sRGB::operator LinearRGB() const
 {
-	return visit(&Colors::component_sRGB_to_linear);
+	return LinearRGB(red, green, blue).visit(&Colors::component_sRGB_to_linear);
 };
 
 sRGB_uint8::operator sRGB() const
