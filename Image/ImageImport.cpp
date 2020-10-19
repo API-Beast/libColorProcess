@@ -58,4 +58,10 @@ namespace Image
 		fclose(f);
 	}
 	
+	// TODO: optimize copy away
+	std::vector<unsigned char> export_image_data_to_png_buffer(const ImageData<sRGB_uint8>& img) 
+	{
+		MinPNG::buf png = MinPNG::make_png(img.data, img.size.x, img.size.y, sizeof(sRGB_uint8), MinPNG::buf_cat_str_rgb);
+		return std::vector<unsigned char>(png.data, png.data+png.len);
+	}
 }

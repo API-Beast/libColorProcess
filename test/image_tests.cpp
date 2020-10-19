@@ -13,3 +13,19 @@ YES_TEST(Image, load_png_from_buffer)
 	EXPECT_EQ(d[0].blue,  0);
 	EXPECT_EQ(d[0].blue,  0);
 }
+
+YES_TEST(Image, write_png_to_buffer)
+{
+	ImageData<sRGB_uint8> input;
+	input.allocate(16, 16);
+
+	unsigned char i = 0;
+	for(sRGB_uint8& val : input)
+		val = {32, i++, 64};
+
+	auto buffer = Image::export_image_data_to_png_buffer(input);
+	auto reimport = Image::import_png_from_buffer(buffer.data(), buffer.size());
+
+	EXPECT_EQ(reimport.size, input.size);
+	EXPECT_TRUE(std::equal(reimport.begin(), reimport.end(), input.begin(), input.end()));
+}
