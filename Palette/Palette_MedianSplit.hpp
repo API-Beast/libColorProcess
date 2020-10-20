@@ -3,6 +3,7 @@
 
 #include <array>
 #include <algorithm>
+#include <cmath>
 
 template<typename EntryT, typename Func>
 std::vector<EntryT> Palette::reduce_using_median_split(const std::vector<EntryT>& pal, int max_colors, Func stat_func)

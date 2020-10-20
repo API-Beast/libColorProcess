@@ -42,7 +42,7 @@ int YesTest::run_all_tests()
 	std::vector<Test> failed_tests;
 	std::vector<Test> all_tests = YesTest::get_test_list();
 
-	printf("%s[==========]%s Running %u test cases.\n", CLR_GREEN, CLR_RESET, all_tests.size());
+	printf("%s[==========]%s Running %lu test cases.\n", CLR_GREEN, CLR_RESET, all_tests.size());
 	for(Test current_test : all_tests)
 	{
 		printf("%s[ RUN      ]%s %s\n", CLR_GREEN, CLR_RESET, current_test.name);
@@ -55,10 +55,10 @@ int YesTest::run_all_tests()
 			failed_tests.push_back(current_test);
 		}
 	}
-	printf("%s[==========]%s %u test cases ran.\n", CLR_GREEN, CLR_RESET, all_tests.size());
+	printf("%s[==========]%s %lu test cases ran.\n", CLR_GREEN, CLR_RESET, all_tests.size());
 	if(failed_tests.size() > 0)
 	{
-		printf("%s[  FAILED  ]%s %u tests, listed below:\n", CLR_RED, CLR_RESET, failed_tests.size());
+		printf("%s[  FAILED  ]%s %lu tests, listed below:\n", CLR_RED, CLR_RESET, failed_tests.size());
 		for(Test failed_test : failed_tests)
 			printf("%s[  FAILED  ]%s %s\n", CLR_RED, CLR_RESET, failed_test.name);
 	}

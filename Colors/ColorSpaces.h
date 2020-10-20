@@ -13,7 +13,7 @@ struct HSV;
 struct LinearHSV;
 struct HCY;
 
-struct LinearRGB
+struct alignas(16) LinearRGB
 {
 	float red = 0.0;
 	float green = 0.0;
@@ -29,7 +29,7 @@ struct LinearRGB
 VECTOR3_OPERATORS(LinearRGB, red, green, blue);
 VECTOR3_FUNCTIONS(LinearRGB, red, green, blue);
 
-struct sRGB
+struct alignas(16) sRGB
 {
 	float red = 0.0;
 	float green = 0.0;
@@ -44,7 +44,7 @@ struct sRGB
 VECTOR3_OPERATORS(sRGB, red, green, blue);
 VECTOR3_FUNCTIONS(sRGB, red, green, blue);
 
-struct sRGB_uint8
+struct alignas(4) sRGB_uint8
 {
 	uint8_t red = 0;
 	uint8_t green = 0;
@@ -59,7 +59,7 @@ struct sRGB_uint8
 VECTOR3_OPERATORS(sRGB_uint8, red, green, blue);
 VECTOR3_FUNCTIONS(sRGB_uint8, red, green, blue);
 
-struct HSV
+struct alignas(16) HSV
 {
 	float hue = 0.0;
 	float saturation = 0.0;
@@ -74,7 +74,7 @@ struct HSV
 VECTOR3_OPERATORS(HSV, hue, saturation, value);
 VECTOR3_FUNCTIONS(HSV, hue, saturation, value);
 
-struct LinearHSV
+struct alignas(16) LinearHSV
 {
 	float hue = 0.0;
 	float saturation = 0.0;
@@ -89,7 +89,7 @@ struct LinearHSV
 VECTOR3_OPERATORS(LinearHSV, hue, saturation, value);
 VECTOR3_FUNCTIONS(LinearHSV, hue, saturation, value);
 
-struct HCY
+struct alignas(16) HCY
 {
 	float hue = 0.0;
 	float chroma = 0.0;

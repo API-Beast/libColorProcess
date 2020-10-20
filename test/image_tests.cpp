@@ -26,6 +26,5 @@ YES_TEST(Image, write_png_to_buffer)
 	auto buffer = Image::export_image_data_to_png_buffer(input);
 	auto reimport = Image::import_png_from_buffer(buffer.data(), buffer.size());
 
-	EXPECT_EQ(reimport.size, input.size);
-	EXPECT_TRUE(std::equal(reimport.begin(), reimport.end(), input.begin(), input.end()));
+	EXPECT_CONTAINER_EQ(reimport, input);
 }

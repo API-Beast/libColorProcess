@@ -18,7 +18,7 @@ list(APPEND SOURCE_FILES Image/ImageImport.cpp Image/dependencies/spng.c Image/d
 set(HEADER_FILES libColorTool.h)
 list(APPEND HEADER_FILES Palette/Palette.h Palette/Palette_Sort.hpp Palette/Palette_MedianSplit.hpp)
 list(APPEND HEADER_FILES Colors/Stats.h Colors/Colors.h Colors/ColorSpaces.h)
-list(APPEND HEADER_FILES Math/Vector3.h Math/Vector3Mixin.h)
+list(APPEND HEADER_FILES Math/Vector3.h)
 
 add_library(libColorTool ${SOURCE_FILES} ${HEADER_FILES})
 target_include_directories(libColorTool PUBLIC . Image/dependencies/)
@@ -31,7 +31,7 @@ set_target_properties(libColorTool PROPERTIES
 
 # Enable vectorization
 if(CMAKE_COMPILER_IS_GNUCXX)
-	option(LIBCOLORTOOL_VECTORIZE "Try to vectorize all targets linking libColorTool." OFF)
+	option(LIBCOLORTOOL_VECTORIZE "Try to vectorize all targets linking libColorTool." ON)
 	if(LIBCOLORTOOL_VECTORIZE)
 		# The "-march=native" is experimental for now, in the future we will use target_clones(...) gcc option to generate SIMD instructions for the targets that make sense.
 		target_compile_options(libColorTool PUBLIC -march=native -ftree-vectorize -ftree-loop-vectorize -fopt-info-vec)

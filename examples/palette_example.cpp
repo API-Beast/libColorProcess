@@ -8,7 +8,7 @@ int main()
 {
 	printf("Importing palette.\n");
 	ColorPalette<sRGB> pal = import_gpl_file("palette.gpl");
-	printf("Palette has %u colors.\n", pal.size());
+	printf("Palette has %lu colors.\n", pal.size());
 	printf("Creating file 'export.html'.\n");
 	HtmlExporter exporter("export.html");
 	exporter.header("palette_operations Example");

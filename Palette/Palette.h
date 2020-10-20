@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Colors/ColorSpaces.h"
+#include "../Colors/Stats.h"
 #include <vector>
 #include <algorithm>
 

@@ -41,11 +41,12 @@ namespace Image
 
 		size_t size;
 		spng_decoded_image_size(ctx, SPNG_FMT_RGB8, &size);
-		assert(size == header.width * header.height * sizeof(sRGB_uint8));
+		assert(size == header.width * header.height * sizeof(uint8_t)*3);
 
 		img.allocate(header.width, header.height);
 		spng_decode_image(ctx, img.data, img.data_length, SPNG_FMT_RGB8, 0);
 
+		spng_ctx_free(ctx);
 		return img;
 	}
 	
@@ -62,6 +63,8 @@ namespace Image
 	std::vector<unsigned char> export_image_data_to_png_buffer(const ImageData<sRGB_uint8>& img) 
 	{
 		MinPNG::buf png = MinPNG::make_png(img.data, img.size.x, img.size.y, sizeof(sRGB_uint8), MinPNG::buf_cat_str_rgb);
-		return std::vector<unsigned char>(png.data, png.data+png.len);
+		std::vector<unsigned char> retVal(png.data, png.data+png.len);
+		free(png.data);
+		return retVal;
 	}
 }

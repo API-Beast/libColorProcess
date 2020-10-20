@@ -5,7 +5,7 @@
 namespace
 {
 template<class T>
-constexpr const T& clamp( T v, T lo, T hi )
+constexpr T clamp( T v, T lo, T hi )
 {
 	return (v < lo) ? lo : (hi < v) ? hi : v;
 }

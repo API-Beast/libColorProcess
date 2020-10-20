@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Math/Vector2.h"
+#include <new>
 
 template<typename T>
 struct ImageData
@@ -11,7 +12,13 @@ struct ImageData
 	Vec2i size = {0, 0};
 
 	ImageData()=default;
-	ImageData(const ImageData& other)=default;
+	ImageData(const ImageData& other)
+	{
+		data = other.data;
+		owns_data = false;
+		data_length = other.data_length;
+		size = other.size;
+	};
 	ImageData(ImageData&& other);
 	~ImageData(){ clear(); };
 
@@ -37,7 +44,7 @@ void ImageData<T>::allocate(int w, int h)
 	clear();
 	owns_data = true;
 	data_length = w*h;
-	data = (T*)new alignas(T) char[data_length * sizeof(T)];
+	data = (T*)::operator new(data_length * sizeof(T), std::align_val_t(alignof(T)));
 	size.x = w;
 	size.y = h;
 }
@@ -48,7 +55,7 @@ void ImageData<T>::clear()
 	if(owns_data)
 	{
 		owns_data = false;
-		delete[] data;
+		::operator delete(data, std::align_val_t(alignof(T)));
 	}
 }
 

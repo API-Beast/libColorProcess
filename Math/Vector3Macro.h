@@ -32,9 +32,9 @@ template<typename Func> constexpr void for_each(Func f){ f(x); f(y); f(z); };\
 \
 constexpr VectorBaseT max_value(){ return x > y ? x : (y > z ? y : z); };\
 constexpr VectorBaseT min_value(){ return x < y ? x : (y < z ? y : z); };\
-constexpr decltype(x) get_x(){ return x; };\
-constexpr decltype(y) get_y(){ return y; };\
-constexpr decltype(z) get_z(){ return z; };
+constexpr decltype(x) get_x() const{ return x; };\
+constexpr decltype(y) get_y() const{ return y; };\
+constexpr decltype(z) get_z() const{ return z; };
 
 #define VECTOR3_FUNCTIONS_T(ClassName, x, y, z, template_args)\
 template_args \
@@ -51,11 +51,6 @@ template_args \
 constexpr ClassName fmod(ClassName value, typename ClassName::VectorBaseT modulo)\
 {\
 	return ClassName(std::fmod(value.x, modulo), std::fmod(value.y, modulo), std::fmod(value.z, modulo));\
-};\
-template_args \
-constexpr ClassName abs(ClassName value)\
-{\
-	return ClassName(std::abs(value.x), std::abs(value.y), std::abs(value.z));\
 };
 
 
