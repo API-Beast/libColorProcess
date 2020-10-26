@@ -4,21 +4,6 @@
 #include <algorithm>
 #include <iostream>
 
-LinearRGB::operator sRGB() const
-{
-	return sRGB(red, green, blue).visit(&Colors::component_linear_to_sRGB);
-};
-
-sRGB::operator LinearRGB() const
-{
-	return LinearRGB(red, green, blue).visit(&Colors::component_sRGB_to_linear);
-};
-
-sRGB_uint8::operator sRGB() const
-{
-	return {red / float(UINT8_MAX), green / float(UINT8_MAX), blue / float(UINT8_MAX)};
-};
-
 uint32_t sRGB_uint8::to_int() 
 {
 	union Conv
@@ -43,11 +28,6 @@ uint32_t sRGB_uint8::to_int()
 	return c.integer;
 };
 
-sRGB::operator sRGB_uint8() const
-{
-	return {uint8_t(red * UINT8_MAX), uint8_t(green * UINT8_MAX), uint8_t(blue * UINT8_MAX)};
-};
-
 HSV::operator sRGB() const
 {
 	Vec3f saturated = Colors::saturate_hue(hue);
@@ -56,7 +36,7 @@ HSV::operator sRGB() const
 	return sRGB{sum.x, sum.y, sum.z};
 }
 
-HSV::HSV(const sRGB& rgbf)
+HSV::HSV(sRGB rgbf)
 {
 	float minV = std::min(rgbf.red, std::min(rgbf.green, rgbf.blue));
 	float maxV = std::max(rgbf.red, std::max(rgbf.green, rgbf.blue));
@@ -84,7 +64,7 @@ LinearHSV::operator LinearRGB() const
 	return {rgb.red, rgb.green, rgb.blue};
 }
 
-LinearHSV::LinearHSV(const LinearRGB& rgbf)
+LinearHSV::LinearHSV(LinearRGB rgbf)
 {
 	HSV hsv(sRGB{rgbf.red, rgbf.green, rgbf.blue});
 	hue = hsv.hue;
@@ -92,7 +72,7 @@ LinearHSV::LinearHSV(const LinearRGB& rgbf)
 	value = hsv.value;
 }
 
-HCY::HCY(const LinearRGB& rgbf)
+HCY::HCY(LinearRGB rgbf)
 {
 	float minV = std::min({rgbf.red, rgbf.green, rgbf.blue});
 	float maxV = std::max({rgbf.red, rgbf.green, rgbf.blue});
@@ -126,4 +106,29 @@ std::pair<float, float> HCY::get_luminance_limits(float chroma, float hue)
 	float lower_limit = full_chroma_lum * chroma;
 	float upper_limit = (full_chroma_lum - 1.0) * chroma + 1.0;
 	return std::make_pair(lower_limit, upper_limit);
+}
+
+uint32_t sRGB_uint8_Alpha::to_int() 
+{
+	union Conv
+	{
+		struct
+		{
+			uint8_t alpha;
+			uint8_t blue;
+			uint8_t green;
+			uint8_t red;
+		} col;
+		uint32_t integer;
+
+		Conv(sRGB_uint8_Alpha p):integer(UINT32_MAX)
+		{
+			col.red = p.red;
+			col.blue = p.blue;
+			col.green = p.green;
+			col.alpha = p.alpha;
+		};
+	};
+	Conv c(*this);
+	return c.integer;
 }

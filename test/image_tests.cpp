@@ -2,6 +2,21 @@
 #include "test_utils.h"
 #include <Image/ImageImport.h>
 
+YES_TEST(Image, copy)
+{
+	ImageData<sRGB_uint8> input;
+	input.allocate(16, 16);
+
+	unsigned char i = 0;
+	for(sRGB_uint8& val : input)
+		val = {32, i++, 64};
+
+	ImageData<sRGB_uint8> copy;
+	copy = input;
+
+	EXPECT_CONTAINER_EQ(copy, input);
+}
+
 YES_TEST(Image, load_png_from_buffer)
 {
 	// Minimal PNG in hex

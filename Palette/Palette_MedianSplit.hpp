@@ -35,7 +35,7 @@ std::vector<EntryT> Palette::reduce_using_median_split(const std::vector<EntryT>
 
 	working_copy.resize(pal.size());
 	splits.reserve(max_colors); 
-	std::transform(pal.begin(), pal.end(), working_copy.begin(), [stat_func](const EntryT& val){ return EntryCopy{val, stat_func(val)}; });
+	std::transform(pal.begin(), pal.end(), working_copy.begin(), [stat_func](EntryT val){ return EntryCopy{val, stat_func(val)}; });
 
 	StatT axis_minimum;
 	StatT axis_maximum;
