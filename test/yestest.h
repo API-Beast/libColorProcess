@@ -53,6 +53,9 @@ namespace YesTest
 	inline void print_value(std::string str){ printf("\"%s\"", str.c_str()); };
 	inline void print_value(const char* str){ printf("\"%s\"", str); };
 
+	//
+	[[gnu::noinline]] void failure(int* errors);
+
 	template<typename A, typename B>
 	inline void print_value(A arg1, B arg2)
 	{
@@ -82,7 +85,6 @@ namespace YesTest
 		{
 			if(i < size)
 			{
-				it++;
 				if(is_success[i])
 					print_value(*it);
 				else
@@ -91,6 +93,7 @@ namespace YesTest
 					print_value(*it);
 					printf(CLR_RESET);
 				}
+				it++;
 			}
 			else
 				printf("%s-----%s", CLR_YELLOW, CLR_RESET);
@@ -125,7 +128,7 @@ namespace YesTest
 	int difference = ulp_difference(val_a, val_b);\
 	if(difference > ulps)\
 	{\
-		(*yes_test_errors) += 1;\
+		YesTest::failure(yes_test_errors);\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: " #x " ~= " #y "\n");\
 		printf(" -> |     Actual: %s", CLR_YELLOW);\
@@ -138,11 +141,12 @@ namespace YesTest
 }
 
 
+// TODO: Move most into extra function so I can properly debug this.
 #define EXPECT_CONTAINER_OP(x, y, OPER, FAILURE)\
 {\
 	using YesTest::print_value;\
-	auto val_a = (x); auto val_b = (y);\
-	auto size_a = std::end(val_a) - std::begin(val_a); auto size_b = std::end(val_b) - std::begin(val_b);\
+	auto& val_a = (x); auto& val_b = (y);\
+	auto size_a = std::distance(std::begin(val_a), std::end(val_a)); auto size_b = std::distance(std::begin(val_b), std::end(val_b));\
 	size_t smaller_size = std::min(size_a, size_b);\
 	size_t larger_size = std::max(size_a, size_b);\
 	std::vector<bool> is_success(larger_size, false);\
@@ -152,48 +156,45 @@ namespace YesTest
 	for(int i = 0; i<smaller_size; i++)\
 	{\
 		is_success[i] = (*it_a OPER *it_b);\
+		if(!is_success[i]) unequal_elements++;\
 		it_a++;\
 		it_b++;\
-		unequal_elements++;\
 	}\
 	if(unequal_elements > 0)\
 	{\
 		int range_start = 0;\
 		int range_end = larger_size;\
-		if((range_end - range_start) > 6)\
+		auto it = std::find(is_success.begin(), is_success.end(), false);\
+		if(it != is_success.end())\
 		{\
-			auto it = std::find(is_success.begin(), is_success.end(), false);\
-			if(it != is_success.end())\
-			{\
-				range_start = (it - is_success.begin()) - 2;\
-				range_end = range_start + 6;\
-			}\
-			if(range_start < 0)\
-			{\
-				range_end += -range_start;\
-				range_start = 0;\
-			}\
-			if(range_end > larger_size)\
-			{\
-				int diff = range_end - larger_size;\
-				range_start -= diff;\
-				range_end -= diff;\
-			}\
-			if(range_start < 0) range_start = 0;\
-			if(range_end > larger_size) range_end = larger_size;\
+			range_start = std::distance(it, is_success.begin()) - 2;\
+			range_end = range_start + 6;\
 		}\
-		(*yes_test_errors) += 1;\
+		if(range_start < 0)\
+		{\
+			range_end += -range_start;\
+			range_start = 0;\
+		}\
+		if(range_end > larger_size)\
+		{\
+			int diff = range_end - larger_size;\
+			range_start -= diff;\
+			range_end -= diff;\
+		}\
+		if(range_start < 0) range_start = 0;\
+		if(range_end > larger_size) range_end = larger_size;\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: " #x" "#OPER" "#y"\n");\
-		printf(" -> |     Actual:\n");\
-		printf(" -> | ");\
+		printf(" -> |     Actual: " #x" "#FAILURE" "#y"\n");\
+		printf(" -> | " #x " is:\n -> | ");\
 		YesTest::print_container_range(std::begin(val_a), range_start, range_end, size_a, is_success);\
-		printf(CLR_YELLOW #FAILURE CLR_RESET "\n");\
-		printf(" -> | ");\
+		printf("\n");\
+		printf(" -> | " #y " is:\n -> | ");\
 		YesTest::print_container_range(std::begin(val_b), range_start, range_end, size_b, is_success);\
 		int additional_failures = unequal_elements - std::count(is_success.begin()+range_start, is_success.begin()+range_end, false);\
 		if(additional_failures > 0)\
 			printf("\n -> | ... and %d more mismatches.\n", additional_failures);\
+		YesTest::failure(yes_test_errors);\
 	}\
 }
 
@@ -206,7 +207,6 @@ namespace YesTest
 	int difference = ulp_difference(val_a, val_b);\
 	if(difference < ulps)\
 	{\
-		(*yes_test_errors) += 1;\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: "#x" !~= " #y"\n");\
 		printf(" -> |     Actual: %s", CLR_YELLOW);\
@@ -215,6 +215,7 @@ namespace YesTest
 		print_value(val_b);\
 		printf("%s\n", CLR_RESET);\
 		printf(" -> |  Precision: %d ULPs (Threshold: " #ulps " ULPs)\n", difference);\
+		YesTest::failure(yes_test_errors);\
 	}\
 }
 
@@ -224,7 +225,6 @@ namespace YesTest
 	auto val_a = (x); auto val_b = (y);\
 	if(!(val_a OPER val_b))\
 	{\
-		(*yes_test_errors) += 1;\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: "#x" "#OPER" "#y"\n");\
 		printf(" -> |     Actual: %s", CLR_YELLOW);\
@@ -232,6 +232,7 @@ namespace YesTest
 		printf(" " #FAILURE " ");\
 		print_value(val_b);\
 		printf("%s\n", CLR_RESET);\
+		YesTest::failure(yes_test_errors);\
 	}\
 }
 
@@ -241,12 +242,12 @@ namespace YesTest
 	auto val_a = (x);\
 	if(!(val_a))\
 	{\
-		(*yes_test_errors) += 1;\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: "#x"\n");\
 		printf(" -> |     Actual: %s", CLR_YELLOW);\
 		print_value(val_a);\
 		printf("%s\n", CLR_RESET);\
+		YesTest::failure(yes_test_errors);\
 	}\
 }
 
@@ -256,12 +257,12 @@ namespace YesTest
 	auto val_a = (x);\
 	if((val_a))\
 	{\
-		(*yes_test_errors) += 1;\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: "#x" is false\n");\
 		printf(" -> |     Actual: %s", CLR_YELLOW);\
 		print_value(val_a);\
 		printf("%s is true\n", CLR_RESET);\
+		YesTest::failure(yes_test_errors);\
 	}\
 }
 
@@ -297,7 +298,6 @@ namespace YesTest
 	auto val_a = (x); auto val_b = (y);\
 	if(!(val_a OPER val_b))\
 	{\
-		(*yes_test_errors) += 1;\
 		YES_PRINT_FAILURE("assertion not fulfilled");\
 		printf(" -> |   Expected: "#x" "#OPER" "#y"\n");\
 		printf(" -> |     Actual: %s", CLR_YELLOW);\
@@ -305,6 +305,7 @@ namespace YesTest
 		printf(" " #FAILURE " ");\
 		print_value(val_b);\
 		printf("%s\n", CLR_RESET);\
+		YesTest::failure(yes_test_errors);\
 		return;\
 	}\
 }
@@ -322,7 +323,6 @@ namespace YesTest
 \
 	if(val_a < val_low || val_a > val_high)\
 	{\
-		(*yes_test_errors) += 1;\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: "#low" <= "#x" <= " #high"\n");\
 		if(val_a < val_low)\
@@ -341,6 +341,7 @@ namespace YesTest
 			print_value(val_high);\
 			printf("%s\n", CLR_RESET);\
 		}\
+		YesTest::failure(yes_test_errors);\
 	}\
 }
 

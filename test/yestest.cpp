@@ -65,3 +65,9 @@ int YesTest::run_all_tests()
 
 	return failed_tests.size();
 }
+
+void YesTest::failure(int* errors)
+{
+	(*errors) += 1;
+	// Set a breakpoint to this function to inspect
+}
