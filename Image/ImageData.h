@@ -49,6 +49,9 @@ struct ImageData
 	const T& at(int x, int y) const{ return *(data+x+y*size.x); }
 	      T& at(int x, int y)      { return *(data+x+y*size.x); }
 
+	T* row(int y){ return data + std::max(std::min(y, size.y), 0) * size.x; };
+	int row_offset(){ return size.x; };
+
 	T* begin(){ return data; };
 	T* end()  { return data + data_length; };
 	const T* begin() const { return data; };

@@ -1,6 +1,7 @@
 #include "yestest.h"
 #include "test_utils.h"
 #include <Image/ImageImport.h>
+#include <Image/ImageIterator.h>
 #include <sstream>
 
 namespace
@@ -37,6 +38,15 @@ YES_TEST(Image, tga_import_cycle)
 	EXPECT_TRUE(buffer.good());
 	auto reimport = Image::TGA::import_from_stream(buffer);
 	EXPECT_CONTAINER_EQ(reimport, input);
+}
+
+YES_TEST(Image, Iterate_rectangle)
+{
+	auto input = make_test_image(24, 16);
+	auto rect_a = Iterate::rectangle(input, 0, 0, input.size.x / 2, input.size.y);
+	auto rect_b = Iterate::rectangle(input, input.size.x / 2, 0, input.size.x / 2, input.size.y);
+	std::copy(rect_a.begin(), rect_a.end(), rect_b.begin());
+	EXPECT_CONTAINER_EQ(rect_a, rect_b);
 }
 
 /*YES_TEST(Image, load_png_from_buffer)

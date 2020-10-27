@@ -1,35 +1,81 @@
 #pragma once
 
-#include "../Math/Vector2.h"
+#include <iterator>
 
 template<typename T>
-struct ImageIterator
+struct IteratorRange
 {
-	T* startPointer = nullptr;
-	Vec2i min;
-	Vec2i max;
-	Vec2i offset;
-	int curI = 0;
-
-	ImageIterator() = default;
-	ImageIterator(const ImageIterator& other, int i):startPointer(other.startPointer), min(other.min), max(other.max), offset(other.offset), curI(i){};
-	ImageIterator(const ImageIterator& other):startPointer(other.startPointer), min(other.min), max(other.max), offset(other.offset), curI(other.curI){};
-	int x() const { return min.x + curI%(max.x - min.x);};
-	int y() const { return min.y + curI/(max.x - min.x);};
-	int max_i() const { return (max.x - min.x) * (max.y - min.y); };
-	ImageIterator begin() const { return {*this, curI}; };
-	ImageIterator end() const { return   {*this, max_i()}; };
-	T& operator*(){ return *reinterpret_cast<T*>(reinterpret_cast<char*>(startPointer) + x()*offset.x + y()*offset.y);};
-	const T& operator*() const { return *reinterpret_cast<T*>(reinterpret_cast<char*>(startPointer) + x()*offset.x + y()*offset.y);};
-	explicit operator bool() const{ return curI > 0 && curI < max_i();};
-	bool operator< (const ImageIterator<T>& other) const{ return &(*other)  < &(**this); };
-	bool operator> (const ImageIterator<T>& other) const{ return &(*other)  > &(**this); };
-	bool operator<=(const ImageIterator<T>& other) const{ return &(*other) <= &(**this); };
-	bool operator>=(const ImageIterator<T>& other) const{ return &(*other) >= &(**this); };
-	bool operator==(const ImageIterator<T>& other) const{ return &(*other) == &(**this); };
-	bool operator!=(const ImageIterator<T>& other) const{ return &(*other) != &(**this); };
-	ImageIterator& operator++(){ curI++; return *this; };
-	ImageIterator& operator--(){ curI--; return *this; };
-	ImageIterator operator+(int i){ return {*this, curI + i}; };
-	ImageIterator operator-(int i){ return {*this, curI - i}; };
+	T start;
+	T stop;
+	T begin() const{ return start; };
+	T end() const{ return stop; };
 };
+
+template<typename T>
+struct ImageIterator : public std::iterator<std::random_access_iterator_tag, T>
+{
+	T* ptr = nullptr;
+	T* row_start = nullptr;
+	ptrdiff_t row_offset = 0;
+	int max_x = 0;
+	constexpr T& operator*(){ return *ptr; };
+	constexpr ImageIterator& operator+=(ptrdiff_t i)
+	{
+		T* new_ptr = ptr + i;
+		int rows_skipped = (new_ptr - row_start) / max_x;
+		int new_x = (new_ptr - row_start) % max_x;
+		row_start += rows_skipped * row_offset;
+		ptr = row_start + new_x;
+		return *this;
+	};
+	constexpr ImageIterator& operator-=(ptrdiff_t i){ return operator+=(-i); }
+	constexpr ImageIterator& operator++(){ return operator+=( 1); };
+	constexpr ImageIterator& operator--(){ return operator+=(-1); };
+	constexpr ImageIterator operator++(int){ auto copy = *this; operator+=( 1); return copy; };
+	constexpr ImageIterator operator--(int){ auto copy = *this; operator+=(-1); return copy; };
+
+	ImageIterator operator+(ptrdiff_t i)
+	{
+		ImageIterator retVal(*this);
+		retVal += i;
+		return retVal;
+	};
+	ImageIterator operator-(ptrdiff_t i){ return operator+(-i);}
+
+	ptrdiff_t operator-(const ImageIterator<T>& other)
+	{
+		ptrdiff_t x_diff = (ptr - row_start) - (other.ptr - other.row_start);
+		ptrdiff_t y_diff = (row_start - other.row_start) / row_offset;
+		return y_diff * max_x + x_diff;
+	}
+
+	constexpr bool operator< (const ImageIterator<T>& other) const{ return ptr  < other.ptr; };
+	constexpr bool operator> (const ImageIterator<T>& other) const{ return ptr  > other.ptr; };
+	constexpr bool operator<=(const ImageIterator<T>& other) const{ return ptr <= other.ptr; };
+	constexpr bool operator>=(const ImageIterator<T>& other) const{ return ptr >= other.ptr; };
+	constexpr bool operator==(const ImageIterator<T>& other) const{ return ptr == other.ptr; };
+	constexpr bool operator!=(const ImageIterator<T>& other) const{ return ptr != other.ptr; };
+};
+
+namespace Iterate
+{
+	template<typename T>
+	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, int x, int y, int w, int h)
+	{
+		IteratorRange<ImageIterator<T>> retVal;
+		x = std::max(std::min(x, data.size.x), 0);
+		w = std::max(std::min(w, data.size.x - x), 0);
+
+		retVal.start.row_start = data.row(y);
+		retVal.start.ptr = retVal.start.row_start + x;
+		retVal.start.row_offset = data.row_offset();
+		retVal.start.max_x = x+w;
+
+		retVal.stop.row_start = data.row(y+h);
+		retVal.stop.ptr = retVal.stop.row_start + x + w;
+		retVal.stop.row_offset = data.row_offset();
+		retVal.stop.max_x = x+w;
+
+		return retVal;
+	};
+}
