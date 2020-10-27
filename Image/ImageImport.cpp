@@ -1,76 +1,15 @@
 #include "ImageImport.h"
-#include "dependencies/spng.h"
-#include <vector>
-#include <fstream>
+
 #include <cassert>
 #include <cstdio>
 #include <new>
 
-namespace MinPNG
-{
-	#include "dependencies/minpng.h"
-}
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
 
 namespace Image
-{
-	ImageData<sRGB_uint8> import_png_from_file(const char* filename) 
-	{
-		std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
-		std::ifstream::pos_type size = ifs.tellg();
-
-		std::vector<unsigned char>  buffer(size);
-
-		ifs.seekg(0, std::ios::beg);
-		ifs.read(reinterpret_cast<char*>(buffer.data()), size);
-
-		return import_png_from_buffer(buffer.data(), buffer.size());
-	}
-
-	ImageData<sRGB_uint8> import_png_from_buffer(const unsigned char* buffer, int buffer_length) 
-	{
-		ImageData<sRGB_uint8> img;
-		unsigned error;
-
-		spng_ctx* ctx = spng_ctx_new(0);
-
-		spng_set_png_buffer(ctx, buffer, buffer_length);
-
-		spng_ihdr header;
-		spng_get_ihdr(ctx, &header);
-
-		/* TODO: Handle color space data? */
-
-		size_t size;
-		spng_decoded_image_size(ctx, SPNG_FMT_RGB8, &size);
-		assert(size == header.width * header.height * sizeof(uint8_t)*3);
-		unsigned char* imported_data = new unsigned char[size];
-
-		spng_decode_image(ctx, imported_data, size, SPNG_FMT_RGB8, 0);
-		// Are you drunk SPNG? The returned data is BGR not RGB
-		img.import_c_array<unsigned char, sRGB_uint8, 3, 2, 1, 0>(header.width, header.height, imported_data, size);
-
-		spng_ctx_free(ctx);
-		delete[] imported_data;
-		return img;
-	}
-	
-	void export_image_data_to_png_file(const ImageData<sRGB_uint8>& img, const char* filename) 
-	{
-		std::FILE *f = std::fopen(filename, "wb+");
-		MinPNG::buf png = MinPNG::make_png(img.data, img.size.x, img.size.y, sizeof(sRGB_uint8), MinPNG::buf_cat_str_rgb);
-		std::fwrite(png.data, png.len, 1, f);
-		std::free(png.data);
-		std::fclose(f);
-	}
-	
-	std::vector<unsigned char> export_image_data_to_png_buffer(const ImageData<sRGB_uint8>& img) 
-	{
-		MinPNG::buf png = MinPNG::make_png(img.data, img.size.x, img.size.y, sizeof(sRGB_uint8), MinPNG::buf_cat_str_rgb);
-		std::vector<unsigned char> retVal(png.data, png.data+png.len);
-		std::free(png.data);
-		return retVal;
-	}
-	
+{	
 	namespace TGA
 	{
 		#pragma scalar_storage_order little_endian
@@ -99,7 +38,74 @@ namespace Image
 		#pragma scalar_storage_order default
 	}
 
-	void export_image_data_to_tga_file(const ImageData<sRGB_uint8_Alpha>& data, const char* filename) 
+	ImageData<sRGB_uint8_Alpha> TGA::import_from_file(const char* filename) 
+	{
+		std::ifstream file(filename, std::ios_base::in | std::ios_base::binary);
+		return import_from_stream(file);	
+	}
+	
+	ImageData<sRGB_uint8_Alpha> TGA::import_from_stream(std::istream& input) 
+	{
+		TGA::Header hdr;
+		input.read((char*)&hdr, sizeof(hdr));
+		if(hdr.color_map_type != 0)
+		{
+			// WIP
+			std::puts("TGA: Color maps are currently not supported.\n");
+			return {};
+		}
+		if(hdr.image_type != 2)
+		{
+			// WIP
+			std::puts("TGA: Only uncompressed 32-bit RGB images are currently supported.\n");
+			return {};
+		}
+		// ID block
+		input.ignore(hdr.id_length);
+		// Color map block
+		//input.ignore(...);
+		// Color data block
+		ImageData<sRGB_uint8_Alpha> retVal(hdr.width, hdr.height);
+		switch(hdr.image_bits_per_pixel)
+		{
+			case 32:
+				for(int i = 0; i < hdr.width * hdr.height; i++)
+				{
+					uint8_t buffer[4];
+					input.read((char*)buffer, 4);
+					retVal[i] = sRGB_uint8_Alpha(buffer[2], buffer[1], buffer[0], buffer[3]);
+				}
+				break;
+			case 24:
+				for(int i = 0; i < hdr.width * hdr.height; i++)
+				{
+					uint8_t buffer[3];
+					input.read((char*)buffer, 3);
+					retVal[i] = sRGB_uint8_Alpha(buffer[2], buffer[1], buffer[0], 255);
+				}
+				break;
+			case 16:
+				for(int i = 0; i < hdr.width * hdr.height; i++)
+				{
+					struct { uint16_t alpha:1,red:5,green:5,blue:5;  } rgb16_buffer;
+					input.read((char*)&rgb16_buffer, 2);
+					retVal[i] = sRGB_uint8_Alpha(rgb16_buffer.red << 3, rgb16_buffer.green << 3, rgb16_buffer.blue << 3, rgb16_buffer.alpha << 8);
+				}
+				break;
+			default:
+				std::puts("TGA: The bitdepth is not supported.");
+				break;
+		}
+		return retVal;
+	}
+	
+	void TGA::export_to_file(const ImageData<sRGB_uint8_Alpha>& data, const char* filename) 
+	{
+		std::ofstream file(filename, std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
+		export_to_stream(data, file);
+	}
+	
+	void TGA::export_to_stream(const ImageData<sRGB_uint8_Alpha>& data, std::ostream& output) 
 	{
 		TGA::Header hdr;
 		hdr.width = data.size.x;
@@ -109,15 +115,14 @@ namespace Image
 		hdr.screen_origin = 0;
 		hdr.interleaving_mode = 0;
 
-		FILE *f = std::fopen(filename, "wb+");
-		std::fwrite(&hdr, 1, sizeof(hdr), f);
+		output.write((char*)&hdr, sizeof(hdr));
 		// 0 size image identification
 		// 0 size color map data
-		for(auto& color : data)
+		for(const auto& color : data)
 		{
 			// Endian weirdness, TGA seems to have stored the color as integer, inheriting the endianness
-			uint8_t buffer[4] = {color.blue, color.red, color.green, color.alpha};
-			std::fwrite(buffer, sizeof(uint8_t), 4, f);
+			uint8_t buffer[4] = {color.blue, color.green, color.red, color.alpha};
+			output.write((char*)buffer, 4);
 		}
 	}
 }

@@ -17,6 +17,7 @@ struct ImageData
 	Vec2i size = {0, 0};
 
 	ImageData()=default;
+	ImageData(int w, int h){ allocate(w, h); };
 	~ImageData(){ clear(); };
 
 	ImageData(ImageData<T>&& other) noexcept;
@@ -35,6 +36,7 @@ struct ImageData
 	void import_c_array(int w, int h, P* ptr, int length);
 
 	void allocate(int w, int h);
+	void allocate(int w, int h, T default_value);
 	void clear();
 	constexpr int pixel_offset(){ return sizeof(T); };
 	int row_offset() const { return sizeof(T) * size.x; };
@@ -43,6 +45,9 @@ struct ImageData
 
 	const T& operator[](int i) const{ return *(data+i); };
 	      T& operator[](int i)      { return *(data+i); };
+
+	const T& at(int x, int y) const{ return *(data+x+y*size.x); }
+	      T& at(int x, int y)      { return *(data+x+y*size.x); }
 
 	T* begin(){ return data; };
 	T* end()  { return data + data_length; };
@@ -58,6 +63,13 @@ void ImageData<T>::allocate(int w, int h)
 	data = (T*)::operator new(data_length * sizeof(T), std::align_val_t(ImageData_SIMD_Alignment));
 	size.x = w;
 	size.y = h;
+}
+
+template<typename T>
+void ImageData<T>::allocate(int w, int h, T default_value) 
+{
+	allocate(w, h);
+	std::uninitialized_fill_n(begin(), w*h, default_value);
 }
 
 template<typename T>
