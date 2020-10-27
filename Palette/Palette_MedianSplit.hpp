@@ -126,7 +126,7 @@ std::vector<EntryT> Palette::reduce_using_median_split(const std::vector<EntryT>
 		IteratorT most_extreme;
 		float most_extreme_extremeness = 0.0;
 		int most_extreme_axis = 0;
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < NumAxis; i++)
 		{
 			auto comp = [i](const EntryCopy& a, const EntryCopy& b){ return a.axis[i] < b.axis[i]; };
 			const auto pair = std::minmax_element(split.from, split.to, comp);
