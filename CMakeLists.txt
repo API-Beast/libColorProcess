@@ -24,8 +24,6 @@ add_library(libColorTool ${SOURCE_FILES} ${HEADER_FILES})
 target_include_directories(libColorTool PUBLIC . Image/dependencies/)
 set_target_properties(libColorTool PROPERTIES
 	WINDOWS_EXPORT_ALL_SYMBOLS ON
-	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 	PREFIX ""
 	)
 
