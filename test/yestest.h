@@ -20,7 +20,7 @@ static void yes_test_run_##CATEGORY##_##NAME(int* yes_test_errors)
 #define YES_MAIN()\
 int main(int argc, char** argv)\
 {\
-	return YesTest::run_all_tests();\
+	return YesTest::run(argc, argv);\
 }
 
 namespace YesTest
@@ -34,7 +34,8 @@ namespace YesTest
 		bool run();
 	};
 
-	int run_all_tests();
+	int run(int argc, char** argv);
+	int run_tests(const std::vector<Test>& tests);
 	std::vector<Test>& get_test_list();
 	bool register_test(Test t);
 
@@ -44,9 +45,10 @@ namespace YesTest
 	inline void print_value(float v)        { printf("%5.3f", double(v)); };
 	inline void print_value(double v)       { printf("%5.3f", v); };
 	inline void print_value(long double v)  { printf("%5.3Lf", v); };
-	inline void print_value(long long int v){ printf("%5.3lld", v); };
-	inline void print_value(long long unsigned int v){ printf("%5llu", v); };
+	inline void print_value(long int ptr)            { printf("%5ld", ptr); };
+	inline void print_value(long long int v)         { printf("%5lld", v); };
 	inline void print_value(long unsigned int v)     { printf("%5lu", v);  };
+	inline void print_value(long long unsigned int v){ printf("%5llu", v); };
 	template<typename T>
 	inline void print_value(T* ptr){ printf("%5p", ptr); };
 	inline void print_value(std::nullptr_t){ printf("nullptr"); };
