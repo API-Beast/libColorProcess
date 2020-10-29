@@ -9,6 +9,11 @@ struct IteratorRange
 	T stop;
 	T begin() const{ return start; };
 	T end() const{ return stop; };
+
+	bool operator==(IteratorRange other) const
+	{
+		return other.start == this.start && other.stop == this.stop;
+	};
 };
 
 template<typename T>
@@ -17,13 +22,17 @@ struct ImageIterator : public std::iterator<std::random_access_iterator_tag, T>
 	T* ptr = nullptr;
 	T* row_start = nullptr;
 	ptrdiff_t row_offset = 0;
-	int max_x = 0;
+	int width = 0;
 	constexpr T& operator*(){ return *ptr; };
 	constexpr ImageIterator& operator+=(ptrdiff_t i)
 	{
+		constexpr auto euc_mod = [](int a, int b) constexpr{ return a < 0 ? (a % b) + b     : a % b; };
+		constexpr auto euc_div = [](int a, int b) constexpr{ return a < 0 ? (a - b + 1) / b : a / b; };
+
 		T* new_ptr = ptr + i;
-		int rows_skipped = (new_ptr - row_start) / max_x;
-		int new_x = (new_ptr - row_start) % max_x;
+		auto diff = new_ptr - row_start;
+		int rows_skipped = euc_div(diff, width);
+		int new_x        = euc_mod(diff, width);
 		row_start += rows_skipped * row_offset;
 		ptr = row_start + new_x;
 		return *this;
@@ -46,7 +55,7 @@ struct ImageIterator : public std::iterator<std::random_access_iterator_tag, T>
 	{
 		ptrdiff_t x_diff = (ptr - row_start) - (other.ptr - other.row_start);
 		ptrdiff_t y_diff = (row_start - other.row_start) / row_offset;
-		return y_diff * max_x + x_diff;
+		return y_diff * width + x_diff;
 	}
 
 	constexpr bool operator< (const ImageIterator<T>& other) const{ return ptr  < other.ptr; };
@@ -60,22 +69,36 @@ struct ImageIterator : public std::iterator<std::random_access_iterator_tag, T>
 namespace Iterate
 {
 	template<typename T>
-	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, int x, int y, int w, int h)
+	IteratorRange<ImageIterator<T> > region(ImageData<T>& data, int x, int y, int x2, int y2)
 	{
 		IteratorRange<ImageIterator<T>> retVal;
-		x = std::max(std::min(x, data.size.x), 0);
-		w = std::max(std::min(w, data.size.x - x), 0);
+		if(x > x2){ std::swap(x, x2); };
+		if(y > y2){ std::swap(y, y2); };
 
-		retVal.start.row_start = data.row(y);
-		retVal.start.ptr = retVal.start.row_start + x;
+		x  = std::max(std::min( x, data.size.x), 0);
+		y  = std::max(std::min( y, data.size.y), 0);
+		x2 = std::max(std::min(x2, data.size.x), 0);
+		y2 = std::max(std::min(y2, data.size.y), 0);
+		int w = x2 - x;
+		int h = y2 - y;
+
+		retVal.start.row_start = data.row(y) + x;
+		retVal.start.ptr = retVal.start.row_start;
 		retVal.start.row_offset = data.row_offset();
-		retVal.start.max_x = x+w;
+		retVal.start.width = w;
 
-		retVal.stop.row_start = data.row(y+h);
-		retVal.stop.ptr = retVal.stop.row_start + x + w;
+		retVal.stop.row_start = data.row(y + h) + x;
+		retVal.stop.ptr = retVal.stop.row_start + w - 1;
 		retVal.stop.row_offset = data.row_offset();
-		retVal.stop.max_x = x+w;
+		retVal.stop.width = w;
+		retVal.stop++;
 
 		return retVal;
+	};
+
+	template<typename T>
+	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, int x, int y, int w, int h)
+	{
+		return region(data, x, y, x+w, y+h);
 	};
 }

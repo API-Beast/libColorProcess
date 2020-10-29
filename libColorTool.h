@@ -8,3 +8,4 @@
 #include "Math/Vector3.h"
 #include "Image/ImageData.h"
 #include "Image/ImageImport.h"
+#include "Image/ImageIterator.h"
