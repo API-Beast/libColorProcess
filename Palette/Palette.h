@@ -10,6 +10,7 @@ using ColorPalette = std::vector<T>;
 
 namespace Palette
 {
+	ColorPalette<sRGB_uint8> import_from_gpl_file(const char* filename);
 	template<typename To, typename From>
 	ColorPalette<To> convert(const ColorPalette<From>& src);
 
