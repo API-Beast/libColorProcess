@@ -229,11 +229,23 @@ namespace YesTest
 	{\
 		YES_PRINT_FAILURE("expectation not fulfilled");\
 		printf(" -> |   Expected: "#x" "#OPER" "#y"\n");\
-		printf(" -> |     Actual: %s", CLR_YELLOW);\
-		print_value(val_a);\
-		printf(" " #FAILURE " ");\
-		print_value(val_b);\
-		printf("%s\n", CLR_RESET);\
+		if(val_a FAILURE val_b)\
+		{\
+			printf(" -> |     Actual: %s", CLR_YELLOW);\
+			print_value(val_a);\
+			printf(" " #FAILURE " ");\
+			print_value(val_b);\
+			printf("%s\n", CLR_RESET);\
+		}\
+		else\
+		{\
+			printf(" -> |     Actual: %s", CLR_YELLOW);\
+			print_value(val_a);\
+			printf(" ??? ");\
+			print_value(val_b);\
+			printf("%s\n", CLR_RESET);\
+			printf(" -> | Comparing the values failed for both "#OPER" and "#FAILURE" (broken operator overloads?)\n");\
+		}\
 		YesTest::failure(yes_test_errors);\
 	}\
 }

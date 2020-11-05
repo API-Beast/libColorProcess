@@ -20,6 +20,13 @@ constexpr static bool is_vector_type = true;\
 constexpr static int num_components = 3;\
 constexpr bool operator==(const ClassName& other){ return x == other.x && y == other.y && z == other.z;  };\
 constexpr bool operator!=(const ClassName& other){ return !operator==(other);  };\
+constexpr bool operator<(const ClassName& other)\
+{\
+	return x == other.x ? (y == other.y ? z < other.z : y < other.y) : x < other.x;\
+};\
+constexpr bool operator>(const ClassName& other){ return !operator<=(other);  };\
+constexpr bool operator>=(const ClassName& other){ return !operator<(other);  };\
+constexpr bool operator<=(const ClassName& other){ return operator<(other) || operator==(other);  };\
 constexpr ClassName operator-() const{ return ClassName(-(x), -(y), -(z)); };\
 \
 constexpr float squareLength(){ return ((x) * (x)) + ((y) * (y)) + ((z) * (z)); };\
@@ -53,7 +60,7 @@ constexpr ClassName fmod(ClassName value, typename ClassName::VectorBaseT modulo
 	return ClassName(std::fmod(value.x, modulo), std::fmod(value.y, modulo), std::fmod(value.z, modulo));\
 };
 
-
+// TODO: All of these can be moved inside the class except scalar x vector.
 #define VECTOR3_OPERATOR(ClassName, OPER, x, y, z, template_args)\
 /* vector x vector */\
 template_args \
@@ -65,7 +72,7 @@ constexpr ClassName operator OPER(const ClassName& vec, typename ClassName::Vect
 template_args \
 constexpr ClassName operator OPER(typename ClassName::VectorBaseT scalar, const ClassName& vec){ return ClassName(static_cast<decltype(vec.x)>(scalar OPER vec.x), static_cast<decltype(vec.x)>(scalar OPER vec.y), static_cast<decltype(vec.z)>(scalar OPER vec.z)); };
 
-
+// TODO: These can be moved inside the class.
 #define VECTOR3_ASSIGN_OPERATOR(ClassName, OPER, x, y, z, template_args)\
 /* vector x vector */\
 template_args \

@@ -1,4 +1,5 @@
 #include "../Math/Vector3.h"
+#include "../Math/Vector4.h"
 #include "test_utils.h"
 
 YES_TEST(Math, Vec3f)
@@ -25,4 +26,32 @@ YES_TEST(Math, Vec3f)
 	Vec3f saturated = {1.0, 0.0, 0.0};
 	Vec3f sum = saturated * value * saturation + gray;
 	EXPECT_EQ(sum, Vec3f(1.0));
+}
+
+YES_TEST(Math, VecComparison)
+{
+	// These work like string comparisons, the first element that is unequal is compared
+	EXPECT_LESS(Vec4f(5, 5, 5, 4), Vec4f(5, 5, 5, 5));
+	EXPECT_LESS(Vec4f(5, 5, 4, 5), Vec4f(5, 5, 5, 5));
+	EXPECT_LESS(Vec4f(5, 4, 5, 5), Vec4f(5, 5, 5, 5));
+	EXPECT_LESS(Vec4f(4, 5, 5, 5), Vec4f(5, 5, 5, 5));
+
+	EXPECT_GREATER(Vec4f(5, 5, 5, 6), Vec4f(5, 5, 5, 5));
+	EXPECT_GREATER(Vec4f(5, 5, 6, 4), Vec4f(5, 5, 5, 5));
+	EXPECT_GREATER(Vec4f(5, 6, 4, 5), Vec4f(5, 5, 5, 5));
+	EXPECT_GREATER(Vec4f(6, 5, 4, 4), Vec4f(5, 5, 5, 5));
+
+	EXPECT_GREATER_OR_EQ(Vec4f(5, 5, 5, 5), Vec4f(5, 5, 5, 5));
+	EXPECT_LESS_OR_EQ(Vec4f(5, 5, 5, 5), Vec4f(5, 5, 5, 5));
+
+	EXPECT_LESS(Vec3f(5, 5, 4), Vec3f(5, 5, 5));
+	EXPECT_LESS(Vec3f(5, 4, 5), Vec3f(5, 5, 5));
+	EXPECT_LESS(Vec3f(4, 5, 5), Vec3f(5, 5, 5));
+	
+	EXPECT_GREATER(Vec3f(5, 5, 6), Vec3f(5, 5, 5));
+	EXPECT_GREATER(Vec3f(5, 6, 4), Vec3f(5, 5, 5));
+	EXPECT_GREATER(Vec3f(6, 5, 4), Vec3f(5, 5, 5));
+
+	EXPECT_GREATER_OR_EQ(Vec3f(5, 5, 5), Vec3f(5, 5, 5));
+	EXPECT_LESS_OR_EQ(Vec3f(5, 5, 5), Vec3f(5, 5, 5));
 }
