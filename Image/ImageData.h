@@ -15,10 +15,14 @@ struct ImageData
 	T* data = nullptr;
 	int data_length = 0;
 	Vec2i size = {0, 0};
+	bool invalid = true;
 
 	ImageData()=default;
 	ImageData(int w, int h){ allocate(w, h); };
 	~ImageData(){ clear(); };
+
+	// Returns a single white pixel.
+	static ImageData<T> fallback_image();
 
 	ImageData(ImageData<T>&& other) noexcept;
 	ImageData<T>& operator=(ImageData<T>&& other) noexcept;
@@ -41,7 +45,8 @@ struct ImageData
 	constexpr int pixel_offset(){ return sizeof(T); };
 	int row_offset() const { return sizeof(T) * size.x; };
 
-	bool is_valid() const { return data != nullptr; };
+	constexpr bool is_valid() const { return data != nullptr && !invalid; };
+	constexpr operator bool(){ return is_valid(); };
 
 	const T& operator[](int i) const{ return *(data+i); };
 	      T& operator[](int i)      { return *(data+i); };
@@ -66,6 +71,7 @@ void ImageData<T>::allocate(int w, int h)
 	data = (T*)::operator new(data_length * sizeof(T), std::align_val_t(ImageData_SIMD_Alignment));
 	size.x = w;
 	size.y = h;
+	invalid = false;
 }
 
 template<typename T>
@@ -79,6 +85,15 @@ template<typename T>
 void ImageData<T>::clear() 
 {
 	::operator delete(data, std::align_val_t(ImageData_SIMD_Alignment));
+}
+
+template<typename T>
+ImageData<T> ImageData<T>::fallback_image() 
+{
+	ImageData<T> retVal;
+	retVal.allocate(1, 1, T(1));
+	retVal.invalid = true;
+	return retVal;
 }
 
 template<typename T>
