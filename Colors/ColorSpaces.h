@@ -111,29 +111,33 @@ struct alignas(16) HCY
 VECTOR3_OPERATORS(HCY, hue, chroma, luminance);
 VECTOR3_FUNCTIONS(HCY, hue, chroma, luminance);
 
-template<typename T, typename P>
-T colorspace_cast(const P& val)
+template<typename To, typename From>
+To colorspace_cast(const From& val)
 {
-	if constexpr(std::is_same<T, P>::value)
+	if constexpr(std::is_same<To, From>::value)
 		return val;
 	// Direct conversion if possible
-	else if constexpr(std::is_convertible<P, T>::value)
-		return static_cast<T>(P(val));
-	else if constexpr(std::is_same<T, LinearRGB>::value || std::is_same<T, sRGB_uint8>::value || std::is_same<T, HSV>::value)
+	else if constexpr(std::is_convertible<From, To>::value)
+		return static_cast<To>(From(val));
+	else if constexpr(std::is_same<To, LinearRGB>::value || std::is_same<To, sRGB_uint8>::value || std::is_same<To, HSV>::value)
 		return colorspace_cast<sRGB>(val);
-	else if constexpr(std::is_same<T, LinearHSV>::value || std::is_same<T, HCY>::value)
+	else if constexpr(std::is_same<To, LinearHSV>::value || std::is_same<To, HCY>::value)
 		return colorspace_cast<LinearRGB>(val);
-	else if constexpr(std::is_same<T, sRGB>::value)
+	else if constexpr(std::is_same<To, sRGB>::value)
 	{
-		if constexpr(std::is_convertible<P, LinearRGB>::value)
+		if constexpr(std::is_convertible<From, LinearRGB>::value)
 			return colorspace_cast<LinearRGB>(val);
-		else if constexpr(std::is_convertible<P, sRGB_uint8>::value)
+		else if constexpr(std::is_convertible<From, sRGB_uint8>::value)
 			return colorspace_cast<sRGB_uint8>(val);
 		else
-			return static_cast<T>(P(val));
+			return static_cast<To>(From(val));
 	}
+	else if constexpr(To::num_components == 3 && From::num_components == 4)
+		return colorspace_cast<To>(val.strip_alpha());
+	else if constexpr(To::num_components == 4 && From::num_components == 3)
+		return colorspace_cast<decltype(To().strip_alpha())>(val);
 	else
-		return static_cast<T>(P(val));
+		return static_cast<To>(From(val));
 };
 
 struct LinearRGB_Alpha;
@@ -150,6 +154,8 @@ struct alignas(16) LinearRGB_Alpha
 	constexpr LinearRGB_Alpha(LinearRGB rgb, float a = 1.0):red(rgb.red), green(rgb.green), blue(rgb.blue), alpha(a){};
 	constexpr operator LinearRGB(){ return {red, green, blue}; };
 	constexpr operator sRGB_Alpha();
+
+	constexpr LinearRGB strip_alpha(){ return *this; };
 
 	VECTOR4_CONSTRUCTORS(LinearRGB_Alpha, red, green, blue, alpha);
 	VECTOR4_MEMBER_FUNCTIONS(LinearRGB_Alpha, red, green, blue, alpha);
@@ -169,6 +175,8 @@ struct alignas(16) sRGB_Alpha
 	constexpr operator sRGB_uint8_Alpha();
 	constexpr operator sRGB(){ return {red, green, blue}; };
 
+	constexpr sRGB strip_alpha(){ return *this; };
+
 	VECTOR4_CONSTRUCTORS(sRGB_Alpha, red, green, blue, alpha);
 	VECTOR4_MEMBER_FUNCTIONS(sRGB_Alpha, red, green, blue, alpha);
 };
@@ -182,10 +190,14 @@ struct alignas(4) sRGB_uint8_Alpha
 	uint8_t blue = 255;
 	uint8_t alpha = 255;
 
+	using alpha_stripped_type = sRGB_uint8;
+
 	constexpr sRGB_uint8_Alpha(sRGB_uint8 rgb, uint8_t a = 255):red(rgb.red), green(rgb.green), blue(rgb.blue), alpha(a){};
 	constexpr operator sRGB_Alpha(){ return sRGB_Alpha(red / float(UINT8_MAX), green / float(UINT8_MAX), blue / float(UINT8_MAX), alpha / float(UINT8_MAX)); };
 	constexpr operator sRGB_uint8(){ return {red, green, blue}; };
 	uint32_t to_int();
+
+	constexpr sRGB_uint8 strip_alpha(){ return *this; };
 
 	VECTOR4_CONSTRUCTORS(sRGB_uint8_Alpha, red, green, blue, alpha);
 	VECTOR4_MEMBER_FUNCTIONS(sRGB_uint8_Alpha, red, green, blue, alpha);
