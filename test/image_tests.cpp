@@ -48,20 +48,20 @@ YES_TEST(ImageIterator, internal_logic)
 	dummy.size = Vec2i(10, 10);
 	dummy.data_length = 100;
 
-	auto region = Iterate::region(dummy, 1, 1, 3, 3);
+	auto region = Iterate::region(dummy, 1, 1, 4, 4);
 	
 	EXPECT_EQ(size_t(region.start.ptr), 11);
-	EXPECT_EQ(region.start.width, 2);
+	EXPECT_EQ(region.start.width, 3);
 	EXPECT_EQ(region.start.row_offset, 10);
 	EXPECT_EQ(size_t(region.start.row_start), 11);
 
 	EXPECT_EQ(size_t(region.stop.ptr), 41);
-	EXPECT_EQ(region.stop.width, 2);
+	EXPECT_EQ(region.stop.width, 3);
 	EXPECT_EQ(region.stop.row_offset, 10);
 	EXPECT_EQ(size_t(region.stop.row_start), 41);
 
 	std::vector<size_t> visited;
-	std::vector<size_t> expected({11, 12, 21, 22, 31, 32});
+	std::vector<size_t> expected({11, 12, 13, 21, 22, 23, 31, 32, 33});
 	auto it = region.begin();
 	while(it != region.end())
 	{
@@ -132,7 +132,7 @@ YES_TEST(ImageIterator, iterate)
 	auto rect = Iterate::rectangle(input, x_off, y_off, w, h);
 	int x = 0;
 	int y = 0;
-	for(auto it = rect.begin(); it < rect.end(); it++)
+	for(auto it = rect.begin(); it != rect.end(); it++)
 	{
 		EXPECT_EQ(&(*it), &(input.at(x + x_off, y + y_off)));
 		x++;
@@ -147,7 +147,7 @@ YES_TEST(ImageIterator, iterate)
 	rect = Iterate::rectangle(input, 0, 0, w, h);
 	x = 0;
 	y = 0;
-	for(auto it = rect.begin(); it < rect.end(); it++)
+	for(auto it = rect.begin(); it != rect.end(); it++)
 	{
 		EXPECT_EQ(&(*it), &(input.at(x, y)));
 		x++;
@@ -162,9 +162,6 @@ YES_TEST(ImageIterator, iterate)
 YES_TEST(ImageIterator, copy)
 {
 	auto input = make_test_image(24, 16);
-
-	auto rect_10_10 = Iterate::rectangle(input, 0, 0, 10, 10);
-	int iterations = 0;
 
 	auto rect_a = Iterate::rectangle(input, 0, 0, input.size.x / 2, input.size.y);
 	auto rect_b = Iterate::rectangle(input, input.size.x / 2, 0, input.size.x / 2, input.size.y);
@@ -182,6 +179,8 @@ YES_TEST(ImageIterator, oversized)
 	EXPECT_EQ(&*exact.begin() - &*input.begin(), 0);
 	EXPECT_EQ(exact.begin() - oversized.begin(), 0);
 	EXPECT_EQ(exact.end() - oversized.end(), 0);
+
+	EXPECT_EQ(&*(exact.end() - 1) - &*(input.end()-1), 0);
 }
 
 YES_TEST(ImageIterator, undersized)

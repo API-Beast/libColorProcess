@@ -17,6 +17,7 @@ namespace Image
 
 	namespace TGA
 	{
+		// If input stream or image is invalid, will return ImageData::fallback_image (a single white pixel with invalid flag = true)
 		ImageData<sRGB_uint8_Alpha> import_from_file(const char* filename);
 		ImageData<sRGB_uint8_Alpha> import_from_stream(std::istream& input);
 		void export_to_file(const ImageData<sRGB_uint8_Alpha>& data, const char* filename);

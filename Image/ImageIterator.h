@@ -12,7 +12,7 @@ struct IteratorRange
 
 	bool operator==(IteratorRange other) const
 	{
-		return other.start == this.start && other.stop == this.stop;
+		return other.start == this->start && other.stop == this->stop;
 	};
 };
 
@@ -82,12 +82,25 @@ namespace Iterate
 		int w = x2 - x;
 		int h = y2 - y;
 
+		if(w == 0 || h == 0)
+		{
+			w = 1;
+			retVal.start.row_start = data.row(y) + x;
+			retVal.start.ptr = retVal.start.row_start;
+			retVal.start.row_offset = data.row_offset();
+			retVal.start.width = w;
+
+			retVal.stop = retVal.start;
+
+			return retVal;
+		}
+
 		retVal.start.row_start = data.row(y) + x;
 		retVal.start.ptr = retVal.start.row_start;
 		retVal.start.row_offset = data.row_offset();
 		retVal.start.width = w;
 
-		retVal.stop.row_start = data.row(y + h) + x;
+		retVal.stop.row_start = data.row(y + h - 1) + x;
 		retVal.stop.ptr = retVal.stop.row_start + w - 1;
 		retVal.stop.row_offset = data.row_offset();
 		retVal.stop.width = w;
@@ -100,5 +113,15 @@ namespace Iterate
 	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, int x, int y, int w, int h)
 	{
 		return region(data, x, y, x+w, y+h);
+	};
+
+	template<typename T>
+	std::vector< IteratorRange< ImageIterator<T> > > chunks(ImageData<T>& data, int w, int h)
+	{
+		std::vector< IteratorRange< ImageIterator<T> > > retVal;
+		for(int y = 0; y < data.size.y; y += h)
+		for(int x = 0; x < data.size.x; x += w)
+			retVal.push_back(rectangle(data, x, y, w, h));
+		return retVal;
 	};
 }
