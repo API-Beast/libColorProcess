@@ -1,7 +1,7 @@
 #include "Palette.h"
 #include <fstream>
 
-ColorPalette<sRGB_uint8> import_gpl_file(const char* filename)
+ColorPalette<sRGB_uint8> Palette::import_from_gpl_file(const char* filename)
 {
 	std::fstream input(filename, std::ios_base::in);
 	ColorPalette<sRGB_uint8> palette;

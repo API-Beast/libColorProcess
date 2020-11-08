@@ -4,30 +4,41 @@
 #include "../Colors/Stats.h"
 #include <vector>
 #include <algorithm>
+#include "../Image/ImageData.h"
+#include <iterator>
 
 template<typename T>
 using ColorPalette = std::vector<T>;
 
 namespace Palette
 {
+	template<typename EntryT, typename It>
+	ColorPalette<EntryT> import_from_image(It begin, It end);
+	template<typename EntryT>
+	ColorPalette<EntryT> import_from_image(const ImageData<EntryT>& data);
+
 	ColorPalette<sRGB_uint8> import_from_gpl_file(const char* filename);
+
 	template<typename To, typename From>
 	ColorPalette<To> convert(const ColorPalette<From>& src);
 
-	template<typename EntryT, typename Func>
-	auto minmax_axis(const ColorPalette<EntryT>& src, Func axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>;
+	template<typename EntryT, typename StatsFn>
+	auto gather_stat_range(const ColorPalette<EntryT>& src, StatsFn axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>;
 
-	template<typename EntryT, typename Func>
-	ColorPalette<EntryT> reduce_using_median_split(const ColorPalette<EntryT>& pal, int max_colors, Func axis_func);
+	template<typename EntryT, typename StatsFn>
+	ColorPalette<EntryT> reduce_using_median_split(const ColorPalette<EntryT>& pal, int max_colors, StatsFn axis_func);
 
-	template<typename EntryT, typename Func>
-	ColorPalette<EntryT> sort(const ColorPalette<EntryT>& pal, Func analysis_function, std::initializer_list<int> fixed_indices = {});
+	template<typename EntryT, typename StatsFn>
+	ColorPalette<EntryT> sort(const ColorPalette<EntryT>& pal, StatsFn axis_func, std::initializer_list<int> fixed_indices = {});
 
-	/*template<typename EntryT, typename Stats, typename Fn>
-	EntryT map_color_relative(const ColorPalette<EntryT>& pal, const EntryT& input, const Stats& paletteStats, const Stats& sourceStats, Fn manipulator = nullptr);
+	template<typename EntryT, typename StatsFn, typename StatsT>
+	EntryT map_color_relative(const ColorPalette<EntryT>& pal, EntryT input, StatsFn axis_func, const StatsT& paletteStats, const StatsT& sourceStats);
 
 	template<typename EntryT>
-	EntryT map_color_absolute(const ColorPalette<EntryT>& pal, const EntryT& input);*/
+	EntryT map_color_absolute(const ColorPalette<EntryT>& pal, EntryT input);
+
+	template<typename EntryT, typename StatsFn, typename StatsT>
+	EntryT map_color_relative_multisample(const ColorPalette<EntryT>& pal, EntryT input, StatsFn analysis_function, const std::pair<StatsT, StatsT>& paletteStats, const std::pair<StatsT, StatsT>& sourceStats);
 }
 
 template<typename To, typename From>
@@ -39,22 +50,41 @@ ColorPalette<To> Palette::convert(const ColorPalette<From>& src)
 };
 
 template<typename EntryT, typename Func>
-auto Palette::minmax_axis(const ColorPalette<EntryT>& src, Func axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>
+auto Palette::gather_stat_range(const ColorPalette<EntryT>& src, Func axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>
 {
 	using AxisT = decltype(axis_func(EntryT()));
 	constexpr auto NumAxis = std::tuple_size<AxisT>::value;
 	std::vector<AxisT> axis;
+	axis.resize(src.size());
 	std::transform(src.begin(), src.end(), axis.begin(), axis_func);
 	std::pair<AxisT, AxisT> retVal;
 	for(int i = 0; i < NumAxis; i++)
 	{
 		auto comp = [i](const AxisT& a, const AxisT& b){ return a[i] < b[i]; };
 		const auto pair = std::minmax_element(axis.begin(), axis.end(), comp);
-		retVal[i] = (*pair.first)[i];
-		retVal[i] = (*pair.second)[i];
+		retVal.first[i] = (*pair.first)[i];
+		retVal.second[i] = (*pair.second)[i];
 	}
 	return retVal;
 }
 
+template<typename EntryT>
+ColorPalette<EntryT> Palette::import_from_image(const ImageData<EntryT>& data) 
+{
+	return Palette::import_from_image<EntryT>(data.begin(), data.end());
+}
+
+template<typename EntryT, typename It>
+ColorPalette<EntryT> Palette::import_from_image(It begin, It end)
+{
+	ColorPalette<EntryT> retVal;
+	retVal.assign(begin, end);
+	std::sort(retVal.begin(), retVal.end());
+	retVal.erase(std::unique(retVal.begin(), retVal.end()), retVal.end());
+	return retVal;
+}
+
+
 #include "Palette_MedianSplit.hpp"
 #include "Palette_Sort.hpp"
+#include "Palette_MapColor.hpp"
