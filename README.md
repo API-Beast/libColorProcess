@@ -1,13 +1,6 @@
 # libColorTool
 
-Work in progress.
-
-For now here is a rough outline of what the documentation should mention.
-
-## Color space classes
-```cpp
-#include "Colors/ColorSpaces.h"
-```
+libColorTool is a modern C++17 library for type-safe image processing. It provides types for the major relative color spaces used in image processing, as well as ways to convert between them. It is lightweight with the STL being the only dependecy.
 
 ```cpp
 // float based
@@ -18,9 +11,13 @@ LinearHSV
 HCY
 // uint8_t based
 sRGB_uint8
+// Versions with alpha values
+sRGB_Alpha
+sRGB_uint8_Alpha
+LinearRGB_Alpha
 ```
 
-All color space classes are 3 dimensional vectors and have operator overloads. (Similar to how colors are handled in GLSL.)
+All of these are vector types and are designed to be used in conjunction with SIMD instructions and automatic vectorization.
 
 ```cpp
 sRGB(0.5, 0.5, 0.5) + sRGB(0.2, 0.2, 0.2);
@@ -35,33 +32,36 @@ Simple conversions are implicit. (LinearRGB to sRGB, sRGB to LinearRGB, sRGB to 
 LinearRGB val = sRGB(0.5, 0.5, 0.5);
 ```
 
-All colorspace types can be converted using colorspace_cast.
+Every colorspace can be converted to every other colorspace using colorspace_cast.
+
 ```cpp
 HSV result = colorspace_cast<HSV>(LinearRGB(1.0, 0.0, 0.0));
 ```
 
-### Color functions
+libColorTool also features functions for processing images and color palettes, see the Examples section below for details.
 
-```cpp
-#include "Colors/Colors.h
+## Including libColorTool in your project
+
+The easiest way to use libColorTool is using git submodules and CMake.
+
+Create a submodule...
+```bash
+git submodule add https://github.com/API-Beast/libColorTool.git
 ```
 
-```cpp
-namespace Colors
-{
-
-constexpr float redness(LinearRGB color); // Red - (Blue + Green) / 2.0
-constexpr float greenness(LinearRGB color); // Green - (Blue + Red) / 2.0
-constexpr float blueness(LinearRGB color); // Blue - (Green + Red) / 2.0
-constexpr float luminance709(LinearRGB color); // Luminance after Rec. 709 standard
-constexpr float chroma(LinearRGB rgbf); // Value of saturated component of color
-constexpr float chroma(sRGB rgbf); // Also available for sRGB colors
-Vec3f saturate_hue(float hue); // Creates a fully saturated generic vector from a hue.
-float hue(Vec3f color); // Gets the hue of a generic vector.
-float vibrance(LinearRGB color); // Distance between the color and a gray of equal luminance, subjectively perceived as vibrance.
-
-}
+... and add it to your CMakeLists.txt.
+```cmake
+add_subdirectory(libColorTool)
+target_link_library(YourLib libColorTool)
 ```
+
+CMake will take care of the linker options and include directories, so that now you can include libColorTool.h to get access to all of it's functionality.
+```cpp
+#include <libColorTool.h>
+```
+
+<!-- everything below this will be replaced by the generate_readme.py script -->
+<!-- auto-generated -->
 
 ## Color palettes
 
@@ -76,11 +76,11 @@ Palettes are simply std::vectors of one of the color space classes.
 
 Stats functions are functions that analyze a color and return a array of all factors to consider.
 
-|                           |      [0]     |      [1]     |     [2]     |    [3]    |    [4]   |
-|---------------------------|:------------:|:------------:|:-----------:|:---------:|:--------:|
-| Stats::perceptive_factors | luminance709 |   vibrance   |   redness   | greenness | blueness |
-| Stats::linrgb_factors     |  LinearRGB red  | LinearRGB green | LinearRGB blue |           |          |
-| Stats::srgb_factors       |   sRGB red   |  sRGB green  |  sRGB blue  |           |          |
+|                           |       [0]       |       [1]       |       [2]       |    [3]    |    [4]   |
+|---------------------------|:---------------:|:---------------:|:---------------:|:---------:|:--------:|
+| Stats::perceptive_factors | luminance709    | vibrance        | redness         | greenness | blueness |
+| Stats::linrgb_factors     | LinearRGB red   | LinearRGB green | LinearRGB blue  |           |          |
+| Stats::srgb_factors       | sRGB red        | sRGB green      | sRGB blue       |           |          |
 
 Perceptive factors are the factors used by ColorTool. sRGB factors are the ones used in most graphics applications such as GIMP or Photoshop.
 
