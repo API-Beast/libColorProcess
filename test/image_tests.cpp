@@ -15,7 +15,7 @@ namespace
 		for(int x = 0; x < w; x++)
 		{
 			// Try to make a pattern that is as easy as possible to figure out what is wrong exactly
-			retVal.at(x, y) = sRGB_uint8_Alpha(x % 256, y % 256, int(std::pow(2, i % 8)) % 256, int(std::pow(2, i+1 % 8)) % 256);
+			retVal.at(x, y) = sRGB_uint8_Alpha(x % 256, y % 256, int(std::pow(2, i % 9)), int(std::pow(2, i % 8 + 1)));
 			i++;
 		}
 		return retVal;
