@@ -30,10 +30,9 @@ set_target_properties(libColorTool PROPERTIES
 
 # Enable vectorization
 if(CMAKE_COMPILER_IS_GNUCXX)
-	option(LIBCOLORTOOL_VECTORIZE "Try to vectorize all targets linking libColorTool." ON)
-	if(LIBCOLORTOOL_VECTORIZE)
-		# The "-march=native" is experimental for now, in the future we will use target_clones(...) gcc option to generate SIMD instructions for the targets that make sense.
-		target_compile_options(libColorTool PUBLIC -march=native -ftree-vectorize -ftree-loop-vectorize -fopt-info-vec)
+	option(LIBCOLORTOOL_AUTO_VECTORIZATION "Try to auto-vectorize all targets linking libColorTool." ON)
+	if(LIBCOLORTOOL_AUTO_VECTORIZATION)
+		target_compile_options(libColorTool PUBLIC -ftree-loop-vectorize -fopt-info-vec-all)
 	endif()
 endif()
 
