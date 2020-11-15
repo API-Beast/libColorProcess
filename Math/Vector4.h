@@ -14,7 +14,6 @@ struct Vector4
 };
 
 VECTOR4_OPERATORS_T(Vector4<T>, x, y, z, w, template<typename T>);
-VECTOR4_FUNCTIONS_T(Vector4<T>, x, y, z, w, template<typename T>);
 
 using Vec4f  = Vector4<float>;
 using Vec4u8 = Vector4<unsigned char>;

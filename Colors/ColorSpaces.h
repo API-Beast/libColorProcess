@@ -32,7 +32,6 @@ struct alignas(16) LinearRGB
 	VECTOR3_MEMBER_FUNCTIONS(LinearRGB, red, green, blue);
 };
 VECTOR3_OPERATORS(LinearRGB, red, green, blue);
-VECTOR3_FUNCTIONS(LinearRGB, red, green, blue);
 
 struct alignas(16) sRGB
 {
@@ -47,7 +46,6 @@ struct alignas(16) sRGB
 	VECTOR3_MEMBER_FUNCTIONS(sRGB, red, green, blue);
 };
 VECTOR3_OPERATORS(sRGB, red, green, blue);
-VECTOR3_FUNCTIONS(sRGB, red, green, blue);
 
 struct alignas(4) sRGB_uint8
 {
@@ -62,7 +60,6 @@ struct alignas(4) sRGB_uint8
 	VECTOR3_MEMBER_FUNCTIONS(sRGB_uint8, red, green, blue);
 };
 VECTOR3_OPERATORS(sRGB_uint8, red, green, blue);
-VECTOR3_FUNCTIONS(sRGB_uint8, red, green, blue);
 
 struct alignas(16) HSV
 {
@@ -77,7 +74,6 @@ struct alignas(16) HSV
 	VECTOR3_MEMBER_FUNCTIONS(HSV, hue, saturation, value);
 };
 VECTOR3_OPERATORS(HSV, hue, saturation, value);
-VECTOR3_FUNCTIONS(HSV, hue, saturation, value);
 
 struct alignas(16) LinearHSV
 {
@@ -92,7 +88,6 @@ struct alignas(16) LinearHSV
 	VECTOR3_MEMBER_FUNCTIONS(LinearHSV, hue, saturation, value);
 };
 VECTOR3_OPERATORS(LinearHSV, hue, saturation, value);
-VECTOR3_FUNCTIONS(LinearHSV, hue, saturation, value);
 
 struct alignas(16) HCY
 {
@@ -161,7 +156,6 @@ struct alignas(16) LinearRGB_Alpha
 	VECTOR4_MEMBER_FUNCTIONS(LinearRGB_Alpha, red, green, blue, alpha);
 };
 VECTOR4_OPERATORS(LinearRGB_Alpha, red, green, blue, alpha);
-VECTOR4_FUNCTIONS(LinearRGB_Alpha, red, green, blue, alpha);
 
 struct alignas(16) sRGB_Alpha
 {
@@ -181,7 +175,6 @@ struct alignas(16) sRGB_Alpha
 	VECTOR4_MEMBER_FUNCTIONS(sRGB_Alpha, red, green, blue, alpha);
 };
 VECTOR4_OPERATORS(sRGB_Alpha, red, green, blue, alpha);
-VECTOR4_FUNCTIONS(sRGB_Alpha, red, green, blue, alpha);
 
 struct alignas(4) sRGB_uint8_Alpha
 {
@@ -203,7 +196,6 @@ struct alignas(4) sRGB_uint8_Alpha
 	VECTOR4_MEMBER_FUNCTIONS(sRGB_uint8_Alpha, red, green, blue, alpha);
 };
 VECTOR4_OPERATORS(sRGB_uint8_Alpha, red, green, blue, alpha);
-VECTOR4_FUNCTIONS(sRGB_uint8_Alpha, red, green, blue, alpha);
 
 namespace Colors
 {

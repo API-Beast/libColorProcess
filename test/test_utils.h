@@ -15,12 +15,12 @@ inline typename std::enable_if<T::is_vector3_type, int>::type ulp_difference(T a
 }
 
 template<typename T>
-typename std::enable_if<T::is_vector4_type, void>::type print_value(const T& f) { printf("{"); YesTest::print_value(f.get_x(), f.get_y(), f.get_z(), f.get_a()); printf("}"); }
+typename std::enable_if<T::is_vector4_type, void>::type print_value(const T& f) { printf("{"); YesTest::print_value(f.get_x(), f.get_y(), f.get_z(), f.get_w()); printf("}"); }
 
 template<typename T>
 inline typename std::enable_if<T::is_vector4_type, int>::type ulp_difference(T a, T b)
 {
-	return std::max({YesTest::ulp_difference(a.get_x(), b.get_x()), YesTest::ulp_difference(a.get_y(), b.get_y()), YesTest::ulp_difference(a.get_z(), b.get_z()), YesTest::ulp_difference(a.get_a(), b.get_a())});
+	return std::max({YesTest::ulp_difference(a.get_x(), b.get_x()), YesTest::ulp_difference(a.get_y(), b.get_y()), YesTest::ulp_difference(a.get_z(), b.get_z()), YesTest::ulp_difference(a.get_w(), b.get_w())});
 }
 
 template<typename T>

@@ -29,35 +29,30 @@ constexpr bool operator>=(const ClassName& other){ return !operator<(other);  };
 constexpr bool operator<=(const ClassName& other){ return operator<(other) || operator==(other);  };\
 constexpr ClassName operator-() const{ return ClassName(-(x), -(y), -(z)); };\
 \
-constexpr float squareLength(){ return ((x) * (x)) + ((y) * (y)) + ((z) * (z)); };\
-constexpr float length(){ return std::sqrt(squareLength()); };\
+constexpr float square_length(){ return ((x) * (x)) + ((y) * (y)) + ((z) * (z)); };\
+constexpr float length(){ return std::sqrt(square_length()); };\
 \
 constexpr ClassName normalized(){ float l = length(); return l > 0.0f ? ClassName{static_cast<decltype(x)>(x/l), static_cast<decltype(y)>(y/l), static_cast<decltype(z)>(z/l)} : ClassName(); };\
-\
-template<typename Func> constexpr ClassName visit(Func f) const{ return ClassName(f(x), f(y), f(z));};\
-template<typename Func> constexpr void for_each(Func f){ f(x); f(y); f(z); };\
 \
 constexpr VectorBaseT max_value(){ return x > y ? x : (y > z ? y : z); };\
 constexpr VectorBaseT min_value(){ return x < y ? x : (y < z ? y : z); };\
 constexpr decltype(x) get_x() const{ return x; };\
 constexpr decltype(y) get_y() const{ return y; };\
-constexpr decltype(z) get_z() const{ return z; };
-
-#define VECTOR3_FUNCTIONS_T(ClassName, x, y, z, template_args)\
-template_args \
-constexpr ClassName clamp(ClassName value, typename ClassName::VectorBaseT min, typename ClassName::VectorBaseT max)\
+constexpr decltype(z) get_z() const{ return z; };\
+\
+template<typename Func> constexpr ClassName visit(Func f) const{ return ClassName(f(x), f(y), f(z));};\
+template<typename Func> constexpr ClassName visit(Func f, ClassName a) const{ return ClassName(f(x, a.x), f(y, a.y), f(z, a.z));};\
+template<typename Func> constexpr ClassName visit(Func f, ClassName a, ClassName b) const{ return ClassName(f(x, a.x, b.x), f(y, a.y, b.y), f(z, a.z, b.z));};\
+template<typename Func> constexpr ClassName visit(Func f, ClassName a, ClassName b, ClassName c) const{ return ClassName(f(x, a.x, b.x, c.x), f(y, a.y, b.y, c.y), f(z, a.z, b.z, c.z));};\
+\
+constexpr ClassName clamp(ClassName min, ClassName max)\
 {\
-	return value.visit([min, max](auto val)\
+	return visit([](auto val, auto min, auto max)\
 	{\
 		if(val < min) return min;\
 		if(val > max) return max;\
 		return val;\
-	});\
-};\
-template_args \
-constexpr ClassName fmod(ClassName value, typename ClassName::VectorBaseT modulo)\
-{\
-	return ClassName(std::fmod(value.x, modulo), std::fmod(value.y, modulo), std::fmod(value.z, modulo));\
+	}, min, max);\
 };
 
 // TODO: All of these can be moved inside the class except scalar x vector.
@@ -92,4 +87,3 @@ VECTOR3_ASSIGN_OPERATOR(ClassName, /=, x, y, z, template_args);\
 VECTOR3_ASSIGN_OPERATOR(ClassName, *=, x, y, z, template_args);
 
 #define VECTOR3_OPERATORS(ClassName, x, y, z) VECTOR3_OPERATORS_T(ClassName, x, y, z,)
-#define VECTOR3_FUNCTIONS(ClassName, x, y, z) VECTOR3_FUNCTIONS_T(ClassName, x, y, z,)

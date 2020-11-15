@@ -19,13 +19,34 @@ struct Vector2
 	constexpr bool operator!=(const Vector2<T>& other){ return !operator==(other);  };
 	constexpr Vector2<T> operator-(){ return Vector2<T>(-x, -y); };
 
-	constexpr float squareLength(){ return (x * x) + (y * y); };
-	constexpr float length(){ return std::sqrt(squareLength()); };
+	constexpr float square_length(){ return (x * x) + (y * y); };
+	constexpr float length(){ return std::sqrt(square_length()); };
 
 	constexpr Vector2<T> normalized(){ return length() > 0 ? ((*this) / length()) : Vector2<T>(); };
 
 	template<typename Func> constexpr Vector2<T> visit(Func f){ return Vector2<T>(f(x), f(y));};
-	template<typename Func> constexpr void for_each(Func f){ f(x); f(y); };
+	template<typename Func> constexpr Vector2<T> visit(Func f, Vector2<T> a)
+	{
+		return Vector2<T>(f(x, a.x), f(y, a.y));
+	};
+	template<typename Func> constexpr Vector2<T> visit(Func f, Vector2<T> a, Vector2<T> b)
+	{
+		return Vector2<T>(f(x, a.x, y.x), f(y, a.y, b.y));
+	};
+	template<typename Func> constexpr Vector2<T> visit(Func f, Vector2<T> a, Vector2<T> b, Vector2<T> c)
+	{
+		return Vector2<T>(f(x, a.x, b.x, c.x), f(y, a.y, b.y, c.y));
+	};
+
+	constexpr Vector2<T> clamp(Vector2<T> min, Vector2<T> max)
+	{
+		return visit([](auto val, auto min, auto max)
+		{
+			if(val < min) return min;
+			if(val > max) return max;
+			return val;
+		}, min, max);
+	};
 };
 
 using Vec2i = Vector2<int>;
