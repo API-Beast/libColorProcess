@@ -20,25 +20,22 @@ namespace Palette
 	ColorPalette<sRGB_uint8> import_from_gpl_file(const char* filename);
 
 	template<typename To, typename From>
-	ColorPalette<To> convert(const ColorPalette<From>& src);
+	[[nodiscard]] ColorPalette<To> convert(const ColorPalette<From>& src);
+	
+	template<typename EntryT, typename StatsFn>
+	[[nodiscard]] ColorPalette<EntryT> reduce_using_median_split(const ColorPalette<EntryT>& pal, int max_colors, StatsFn axis_func);
 
 	template<typename EntryT, typename StatsFn>
-	auto gather_stat_range(const ColorPalette<EntryT>& src, StatsFn axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>;
-
-	template<typename EntryT, typename StatsFn>
-	ColorPalette<EntryT> reduce_using_median_split(const ColorPalette<EntryT>& pal, int max_colors, StatsFn axis_func);
-
-	template<typename EntryT, typename StatsFn>
-	ColorPalette<EntryT> sort(const ColorPalette<EntryT>& pal, StatsFn axis_func, std::initializer_list<int> fixed_indices = {});
+	[[nodiscard]] ColorPalette<EntryT> sort(const ColorPalette<EntryT>& pal, StatsFn axis_func, std::initializer_list<int> fixed_indices = {});
 
 	template<typename EntryT, typename StatsFn, typename StatsT>
-	EntryT map_color_relative(const ColorPalette<EntryT>& pal, EntryT input, StatsFn axis_func, const StatsT& paletteStats, const StatsT& sourceStats);
+	[[nodiscard]] EntryT map_color_relative(const ColorPalette<EntryT>& pal, EntryT input, StatsFn axis_func, const StatsT& paletteStats, const StatsT& sourceStats);
 
 	template<typename EntryT>
-	EntryT map_color_absolute(const ColorPalette<EntryT>& pal, EntryT input);
+	[[nodiscard]] EntryT map_color_absolute(const ColorPalette<EntryT>& pal, EntryT input);
 
 	template<typename EntryT, typename StatsFn, typename StatsT>
-	EntryT map_color_relative_multisample(const ColorPalette<EntryT>& pal, EntryT input, StatsFn analysis_function, const std::pair<StatsT, StatsT>& paletteStats, const std::pair<StatsT, StatsT>& sourceStats);
+	[[nodiscard]] EntryT map_color_relative_multisample(const ColorPalette<EntryT>& pal, EntryT input, StatsFn analysis_function, const std::pair<StatsT, StatsT>& paletteStats, const std::pair<StatsT, StatsT>& sourceStats, StatsT weights = Stats::identity< std::tuple_size_v<StatsT> >());
 }
 
 template<typename To, typename From>
@@ -48,25 +45,6 @@ ColorPalette<To> Palette::convert(const ColorPalette<From>& src)
 	std::transform(src.begin(), src.end(), retVal.begin(), [](const From& color){ return colorspace_cast<To>(color); });
 	return retVal;
 };
-
-template<typename EntryT, typename Func>
-auto Palette::gather_stat_range(const ColorPalette<EntryT>& src, Func axis_func) -> std::pair<decltype(axis_func(EntryT())), decltype(axis_func(EntryT()))>
-{
-	using AxisT = decltype(axis_func(EntryT()));
-	constexpr auto NumAxis = std::tuple_size<AxisT>::value;
-	std::vector<AxisT> axis;
-	axis.resize(src.size());
-	std::transform(src.begin(), src.end(), axis.begin(), axis_func);
-	std::pair<AxisT, AxisT> retVal;
-	for(int i = 0; i < NumAxis; i++)
-	{
-		auto comp = [i](const AxisT& a, const AxisT& b){ return a[i] < b[i]; };
-		const auto pair = std::minmax_element(axis.begin(), axis.end(), comp);
-		retVal.first[i] = (*pair.first)[i];
-		retVal.second[i] = (*pair.second)[i];
-	}
-	return retVal;
-}
 
 template<typename EntryT>
 ColorPalette<EntryT> Palette::import_from_image(const ImageData<EntryT>& data) 
