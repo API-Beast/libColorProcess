@@ -2,22 +2,14 @@
 #include <cmath>
 #include "../Math/Vector3.h"
 
-namespace
-{
-template<class T>
-constexpr T clamp( T v, T lo, T hi )
-{
-	return (v < lo) ? lo : (hi < v) ? hi : v;
-}
-}
-
 Vec3f Colors::saturate_hue(float hue)
 {
+	auto clamp = [](float v, float lo, float hi){ return (v < lo) ? lo : (hi < v) ? hi : v; };
 	const Vec3f channels{0.0, 2.0 / 3.0, 1.0 / 3.0}; 
 	return Vec3f(
-		clamp<float>(std::abs(std::fmod(hue + channels.x, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0),
-		clamp<float>(std::abs(std::fmod(hue + channels.y, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0),
-		clamp<float>(std::abs(std::fmod(hue + channels.z, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0)
+		clamp(std::abs(std::fmod(hue + channels.x, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0),
+		clamp(std::abs(std::fmod(hue + channels.y, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0),
+		clamp(std::abs(std::fmod(hue + channels.z, 1.0) * 6.0 - 3.0)-1.0, 0.0, 1.0)
 	);
 }
 

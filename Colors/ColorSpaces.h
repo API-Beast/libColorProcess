@@ -104,36 +104,6 @@ struct alignas(16) HCY
 	VECTOR3_MEMBER_FUNCTIONS(HCY, hue, chroma, luminance);
 };
 VECTOR3_OPERATORS(HCY, hue, chroma, luminance);
-VECTOR3_FUNCTIONS(HCY, hue, chroma, luminance);
-
-template<typename To, typename From>
-To colorspace_cast(const From& val)
-{
-	if constexpr(std::is_same<To, From>::value)
-		return val;
-	// Direct conversion if possible
-	else if constexpr(std::is_convertible<From, To>::value)
-		return static_cast<To>(From(val));
-	else if constexpr(std::is_same<To, LinearRGB>::value || std::is_same<To, sRGB_uint8>::value || std::is_same<To, HSV>::value)
-		return colorspace_cast<sRGB>(val);
-	else if constexpr(std::is_same<To, LinearHSV>::value || std::is_same<To, HCY>::value)
-		return colorspace_cast<LinearRGB>(val);
-	else if constexpr(std::is_same<To, sRGB>::value)
-	{
-		if constexpr(std::is_convertible<From, LinearRGB>::value)
-			return colorspace_cast<LinearRGB>(val);
-		else if constexpr(std::is_convertible<From, sRGB_uint8>::value)
-			return colorspace_cast<sRGB_uint8>(val);
-		else
-			return static_cast<To>(From(val));
-	}
-	else if constexpr(To::num_components == 3 && From::num_components == 4)
-		return colorspace_cast<To>(val.strip_alpha());
-	else if constexpr(To::num_components == 4 && From::num_components == 3)
-		return colorspace_cast<decltype(To().strip_alpha())>(val);
-	else
-		return static_cast<To>(From(val));
-};
 
 struct LinearRGB_Alpha;
 struct sRGB_Alpha;

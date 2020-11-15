@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ColorSpaces.h"
+#include "Colors.h"
 
 class GenericColor
 {
