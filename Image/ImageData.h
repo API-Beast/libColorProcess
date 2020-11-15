@@ -1,16 +1,18 @@
 #pragma once
 
 #include "../Math/Vector2.h"
+#include "../Colors/Colors.h"
 #include <new>
 #include <cstring>
 #include <type_traits>
 #include <cassert>
 #include <memory>
+#include <initializer_list>
 
 constexpr int ImageData_SIMD_Alignment = 32;
 
 template<typename T>
-struct ImageData
+struct [[nodiscard]] ImageData
 {
 	T* data = nullptr;
 	int data_length = 0;
@@ -41,6 +43,8 @@ struct ImageData
 
 	void allocate(int w, int h);
 	void allocate(int w, int h, T default_value);
+	void allocate(Vec2i size){ return allocate(size.x, size.y); };
+	void allocate(Vec2i size, T default_value){ return allocate(size.x, size.y, default_value); };
 	void clear();
 	constexpr int pixel_offset(){ return sizeof(T); };
 	int row_offset() const { return sizeof(T) * size.x; };
@@ -53,6 +57,9 @@ struct ImageData
 
 	const T& at(int x, int y) const{ return *(data+x+y*size.x); }
 	      T& at(int x, int y)      { return *(data+x+y*size.x); }
+
+	const T& at(Vec2i pos) const{ return at(pos.x, pos.y); }
+	      T& at(Vec2i pos)      { return at(pos.x, pos.y); }
 
 	T* row(int y){ return data + std::max(std::min(y, size.y), 0) * size.x; };
 	int row_offset(){ return size.x; };

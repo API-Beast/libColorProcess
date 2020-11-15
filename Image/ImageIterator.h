@@ -110,9 +110,21 @@ namespace Iterate
 	};
 
 	template<typename T>
+	IteratorRange<ImageIterator<T> > region(ImageData<T>& data, Vec2i start_pos, Vec2i end_pos)
+	{
+		return region(data, start_pos.x, start_pos.y, end_pos.x, end_pos.y);
+	};
+
+	template<typename T>
 	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, int x, int y, int w, int h)
 	{
 		return region(data, x, y, x+w, y+h);
+	};
+
+	template<typename T>
+	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, Vec2i pos, Vec2i size)
+	{
+		return region(data, pos.x, pos.y, pos.x+pos.w, pos.y+pos.h);
 	};
 
 	template<typename T>
@@ -123,5 +135,11 @@ namespace Iterate
 		for(int x = 0; x < data.size.x; x += w)
 			retVal.push_back(rectangle(data, x, y, w, h));
 		return retVal;
+	};
+
+	template<typename T>
+	std::vector< IteratorRange< ImageIterator<T> > > chunks(ImageData<T>& data, Vec2i size)
+	{
+		return chunks(data, size.x, size.y);
 	};
 }
