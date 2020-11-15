@@ -71,39 +71,34 @@ namespace Image
 		//input.ignore(...);
 		// Color data block
 		ImageData<sRGB_uint8_Alpha> retVal(header.width, header.height);
-		auto correct_origin = [header](int x, int y)
-		{
-			if(header.screen_origin == 0)
-				return ((header.height - 1 - y) * header.width ) + x;
-			return y * header.width + x;
-		};
+		auto correct_x = [header](int x)->int{ if(header.screen_origin == 1) return header.width - x; return x;};
 		switch(header.image_bits_per_pixel)
 		{
 			case 32:
-				for(int y = 0; y < header.height; y++)
+				for(int y = header.height-1; y >= 0; y--)
 				for(int x = 0; x < header.width; x++)
 				{
 					uint8_t buffer[4];
 					input.read((char*)buffer, 4);
-					retVal[correct_origin(x, y)] = sRGB_uint8_Alpha(buffer[2], buffer[1], buffer[0], buffer[3]);
+					retVal.at(correct_x(x), y) = sRGB_uint8_Alpha(buffer[2], buffer[1], buffer[0], buffer[3]);
 				}
 				break;
 			case 24:
-				for(int y = 0; y < header.height; y++)
+				for(int y = header.height-1; y >= 0; y--)
 				for(int x = 0; x < header.width; x++)
 				{
 					uint8_t buffer[3];
 					input.read((char*)buffer, 3);
-					retVal[correct_origin(x, y)] = sRGB_uint8_Alpha(buffer[2], buffer[1], buffer[0], 255);
+					retVal.at(correct_x(x), y) = sRGB_uint8_Alpha(buffer[2], buffer[1], buffer[0], 255);
 				}
 				break;
 			case 16:
-				for(int y = 0; y < header.height; y++)
+				for(int y = header.height-1; y >= 0; y--)
 				for(int x = 0; x < header.width; x++)
 				{
 					struct { uint16_t alpha:1,red:5,green:5,blue:5;  } rgb16_buffer;
 					input.read((char*)&rgb16_buffer, 2);
-					retVal[correct_origin(x, y)] = sRGB_uint8_Alpha(rgb16_buffer.red << 3, rgb16_buffer.green << 3, rgb16_buffer.blue << 3, rgb16_buffer.alpha << 8);
+					retVal.at(correct_x(x), y) = sRGB_uint8_Alpha(rgb16_buffer.red << 3, rgb16_buffer.green << 3, rgb16_buffer.blue << 3, rgb16_buffer.alpha << 8);
 				}
 				break;
 			default:
@@ -122,19 +117,21 @@ namespace Image
 	
 	void TGA::export_to_stream(const ImageData<sRGB_uint8_Alpha>& data, std::ostream& output) 
 	{
-		TGA::Header hdr;
-		hdr.width = data.size.x;
-		hdr.height = data.size.y;
-		hdr.bits_per_component = 0;
-		hdr.reserved = 0;
-		hdr.screen_origin = 1;
-		hdr.interleaving_mode = 0;
+		TGA::Header header;
+		header.width = data.size.x;
+		header.height = data.size.y;
+		header.bits_per_component = 0;
+		header.reserved = 0;
+		header.screen_origin = 0;
+		header.interleaving_mode = 0;
 
-		output.write((char*)&hdr, sizeof(hdr));
+		output.write((char*)&header, sizeof(header));
 		// 0 size image identification
 		// 0 size color map data
-		for(const auto& color : data)
+		for(int y = header.height-1; y >= 0; y--)
+		for(int x = 0; x < header.width; x++)
 		{
+			auto color = data.at(x, y);
 			// Endian weirdness, TGA seems to have stored the color as integer, inheriting the endianness
 			uint8_t buffer[4] = {color.blue, color.green, color.red, color.alpha};
 			output.write((char*)buffer, 4);
