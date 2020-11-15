@@ -7,6 +7,9 @@ target_link_libraries(basic_remap libColorTool)
 add_executable(smart_remap src/smart_remap.cpp)
 target_link_libraries(smart_remap libColorTool)
 
+add_executable(export_palette src/export_palette.cpp)
+target_link_libraries(export_palette libColorTool)
+
 add_custom_target(
 	copy_examples ALL
 	COMMAND
@@ -25,14 +28,8 @@ add_custom_target(
 	COMMAND invert_colors
 	COMMAND basic_remap
 	COMMAND smart_remap
+	COMMAND export_palette
 	DEPENDS
 		copy_examples
-		invert_colors
-		basic_remap
-		smart_remap
-	BYPRODUCTS
-		${CMAKE_CURRENT_BINARY_DIR}/invert_colors.tga
-		${CMAKE_CURRENT_BINARY_DIR}/basic_remap.tga
-		${CMAKE_CURRENT_BINARY_DIR}/smart_remap.tga
 	COMMENT
 		"Running examples to generate images.")

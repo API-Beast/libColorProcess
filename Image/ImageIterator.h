@@ -124,7 +124,7 @@ namespace Iterate
 	template<typename T>
 	IteratorRange<ImageIterator<T> > rectangle(ImageData<T>& data, Vec2i pos, Vec2i size)
 	{
-		return region(data, pos.x, pos.y, pos.x+pos.w, pos.y+pos.h);
+		return region(data, pos.x, pos.y, pos.x+size.x, pos.y+size.y);
 	};
 
 	template<typename T>

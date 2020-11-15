@@ -3,7 +3,7 @@
 int main()
 {
 	ImageData<LinearRGB>    img     = Image::TGA::import_from_file("source_image.tga").make_copy<LinearRGB>();
-	ColorPalette<LinearRGB> target_pal = Palette::convert<LinearRGB>(Palette::import_from_gpl_file("source_palette.gpl"));
+	ColorPalette<LinearRGB> target_pal = Palette::convert<LinearRGB>(Palette::GPL::import_from_file("source_palette.gpl"));
 
 	// The first way we can improve this is by using different set of comparison factors from the raw color values.
 	// Then we can find the minimum and maximum of each of these comparison factors,
@@ -13,5 +13,5 @@ int main()
 	for(auto& color : img)
 		color = Palette::map_color_relative(target_pal, color, Stats::perceptive_factors, target_stats, img_stats, {6.0, 1.0, 1.0, 1.0, 1.0});
 	
-	Image::TGA::export_to_file(img.make_copy<sRGB_uint8_Alpha>(), "smart_remap.tga");
+	Image::TGA::export_to_file("smart_remap.tga", img.make_copy<sRGB_uint8_Alpha>());
 }

@@ -1,7 +1,9 @@
 #include "../Palette/Palette.h"
+#include "../Palette/PaletteImport.h"
 #include "test_utils.h"
 #include "yestest.h"
 #include <random>
+#include <sstream>
 
 namespace
 {
@@ -19,6 +21,18 @@ namespace
 		std::uniform_real_distribution<double> lum_dist(limits.first, limits.second);
 		retVal.luminance = lum_dist(rng);
 
+		return retVal;
+	};
+
+	ColorPalette<sRGB_uint8> make_test_palette(int entries)
+	{
+		ColorPalette<sRGB_uint8> retVal;
+		retVal.resize(entries, sRGB_uint8(255));
+		for(int i = 0; i < entries; i++)
+		{
+			retVal[i] = sRGB_uint8(int(std::pow(2, i)) % 256, int(std::pow(2, i)) % 128 * 2, int(std::pow(2, i)) % 64 * 4);
+			i++;
+		}
 		return retVal;
 	};
 }
@@ -89,4 +103,14 @@ YES_TEST(Palette, Sort)
 	}
 	EXPECT_LESS(equal_entries, sorted.size()/10); // Extremely unlikely that more than 10% of entries end up randomly pre-sorted
 	EXPECT_EQ(entries_in_both, sorted.size());
+}
+
+YES_TEST(Image, gpl_import_cycle)
+{
+	ColorPalette<sRGB_uint8> input = make_test_palette(16);
+	std::stringstream buffer;
+	Palette::GPL::export_to_stream(input, buffer);
+	EXPECT_TRUE(buffer.good());
+	auto reimport = Palette::GPL::import_from_stream(buffer);
+	EXPECT_CONTAINER_EQ(reimport, input);
 }

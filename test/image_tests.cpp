@@ -15,7 +15,7 @@ namespace
 		for(int x = 0; x < w; x++)
 		{
 			// Try to make a pattern that is as easy as possible to figure out what is wrong exactly
-			retVal.at(x, y) = sRGB_uint8_Alpha(x % 256, y % 256, std::pow(2, i % 8), std::pow(2, i+1 % 8));
+			retVal.at(x, y) = sRGB_uint8_Alpha(x % 256, y % 256, int(std::pow(2, i % 8)) % 256, int(std::pow(2, i+1 % 8)) % 256);
 			i++;
 		}
 		return retVal;
@@ -35,7 +35,7 @@ YES_TEST(Image, tga_import_cycle)
 {
 	auto input = make_test_image(16, 16);
 	std::stringstream buffer;
-	Image::TGA::export_to_stream(input, buffer);
+	Image::TGA::export_to_stream(buffer, input);
 	EXPECT_TRUE(buffer.good());
 	auto reimport = Image::TGA::import_from_stream(buffer);
 	EXPECT_CONTAINER_EQ(reimport, input);

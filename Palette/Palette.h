@@ -17,8 +17,6 @@ namespace Palette
 	template<typename EntryT>
 	ColorPalette<EntryT> import_from_image(const ImageData<EntryT>& data);
 
-	ColorPalette<sRGB_uint8> import_from_gpl_file(const char* filename);
-
 	template<typename To, typename From>
 	[[nodiscard]] ColorPalette<To> convert(const ColorPalette<From>& src);
 	

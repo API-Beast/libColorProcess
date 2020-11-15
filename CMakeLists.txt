@@ -14,10 +14,10 @@ set(CMAKE_CXX_EXTENSIONS NO)
 
 set(SOURCE_FILES Colors/Colors.cpp Colors/ColorSpaces.cpp Colors/GenericColor.cpp)
 list(APPEND SOURCE_FILES Image/ImageImport.cpp)
-list(APPEND SOURCE_FILES Palette/Palette_Import.cpp)
+list(APPEND SOURCE_FILES Palette/PaletteImport.cpp)
 
 set(HEADER_FILES libColorTool.h)
-list(APPEND HEADER_FILES Palette/Palette.h Palette/Palette_Sort.hpp Palette/Palette_MedianSplit.hpp)
+list(APPEND HEADER_FILES Palette/Palette.h Palette/PaletteImport.h Palette/Palette_Sort.hpp Palette/Palette_MedianSplit.hpp)
 list(APPEND HEADER_FILES Colors/Stats.h Colors/Colors.h Colors/ColorSpaces.h)
 list(APPEND HEADER_FILES Math/Vector3.h)
 

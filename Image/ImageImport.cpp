@@ -109,13 +109,13 @@ namespace Image
 		return retVal;
 	}
 	
-	void TGA::export_to_file(const ImageData<sRGB_uint8_Alpha>& data, const char* filename) 
+	void TGA::export_to_file(const char* filename, const ImageData<sRGB_uint8_Alpha>& data)
 	{
 		std::ofstream file(filename, std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-		export_to_stream(data, file);
+		export_to_stream(file, data);
 	}
 	
-	void TGA::export_to_stream(const ImageData<sRGB_uint8_Alpha>& data, std::ostream& output) 
+	void TGA::export_to_stream(std::ostream& output, const ImageData<sRGB_uint8_Alpha>& data) 
 	{
 		TGA::Header header;
 		header.width = data.size.x;

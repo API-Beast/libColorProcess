@@ -59,7 +59,7 @@ namespace Colors
 		return c;
 	};
 
-	[[deprecated("HCY Validation is not implemented yet! TODO FIXME")]]
+	[[deprecated("TODO FIXME: HCY Validation is not implemented yet!")]]
 	constexpr HCY validate(HCY c)
 	{
 		// TODO
