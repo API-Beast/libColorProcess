@@ -16,6 +16,7 @@ add_custom_target(
 		${CMAKE_COMMAND} -E copy 
 		${CMAKE_CURRENT_SOURCE_DIR}/source_palette.gpl
 		${CMAKE_CURRENT_SOURCE_DIR}/source_image.tga
+		${CMAKE_CURRENT_SOURCE_DIR}/source_image2.tga
 		${CMAKE_CURRENT_SOURCE_DIR}/src/invert_colors.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/basic_remap.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/smart_remap.cpp
@@ -28,6 +29,7 @@ add_custom_target(
 	COMMAND invert_colors
 	COMMAND basic_remap
 	COMMAND smart_remap
+	COMMAND smart_remap source_image2.tga smart_remap2.tga
 	COMMAND export_palette
 	DEPENDS
 		copy_examples

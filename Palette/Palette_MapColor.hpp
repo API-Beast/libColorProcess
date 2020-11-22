@@ -28,7 +28,7 @@ namespace Palette
 	{
 		assert(pal.size() > 0);
 		static_assert(std::is_same_v<StatsT, std::decay_t<decltype(analysis_function(EntryT()))> >, "StatsT and return type of analysis_function needs to match.");
-		constexpr auto NumAxis = std::tuple_size_v<StatsT>;
+		constexpr auto N = std::tuple_size_v<StatsT>;
 		using AxisType = typename StatsT::value_type;
 
 		float lowest_distance = HUGE_VALF;
@@ -38,18 +38,18 @@ namespace Palette
 			return (val - min) / (max - min);
 		};
 
-		StatsT normalized_input_stats = analysis_function(input);
-		for(int i = 0; i < NumAxis; i++)
-			normalized_input_stats[i] = inv_lerp(normalized_input_stats[i], sourceStats.first[i], sourceStats.second[i]);
+		StatsT input_pos = analysis_function(input);
+		for(int i = 0; i < N; i++)
+			input_pos[i] = inv_lerp(input_pos[i], sourceStats.first[i], sourceStats.second[i]);
 		for(auto& entry : pal)
 		{
 			float distance = 0.0f;
 			auto result = analysis_function(entry);
-			for(int i = 0; i < NumAxis; i++)
+			for(int i = 0; i < N; i++)
 			{
 				auto axis = inv_lerp(result[i], paletteStats.first[i], paletteStats.second[i]);
-				auto diff = axis - normalized_input_stats[i];
-				distance += (diff * diff) * weights[i];
+				auto diff = axis - input_pos[i];
+				distance += diff * diff * weights[i];
 			}
 			if(distance < lowest_distance)
 			{
@@ -64,36 +64,50 @@ namespace Palette
 	EntryT map_color_relative_multisample(const ColorPalette<EntryT>& pal, EntryT input, StatsFn analysis_function, const std::pair<StatsT, StatsT>& paletteStats, const std::pair<StatsT, StatsT>& sourceStats, StatsT weights) 
 	{
 		assert(pal.size() > 0);
-		constexpr auto NumAxis = std::tuple_size<StatsT>::value;
+		constexpr auto N = std::tuple_size<StatsT>::value;
 		using AxisType = typename StatsT::value_type;
 
-		// We need as many samples as vertices of a hypercube in that dimension
-		// 1 axis = line segment (2 vertices/samples), 2 axis = quad (4 samples)
-		// 3 axis = hexahedron (8 samples), 4 axis = octachoron (16 samples), etc
-		constexpr int NumSamples = std::pow(2, NumAxis);
-		float sample_distance[NumSamples];
-		const EntryT* samples[NumSamples];
+		// Arbitary choice, how many colors to take into account.
+		// In testing there was no longer any noticable difference between the results between 6 and 7 samples.
+		// However additional samples have only a minimal performance impact and a higher number of samples may prevent artifacts with ill formed palettes.
+		constexpr int NumSamples = 12;
+		float  sample_distance[NumSamples];
+		const  EntryT* samples[NumSamples] = {};
+		StatsT      sample_pos[NumSamples];
 		std::uninitialized_fill_n(sample_distance, NumSamples, HUGE_VALF);
-		std::uninitialized_fill_n(samples, NumSamples, nullptr);
+		// sample_pos remains uninitialized
 
 		constexpr auto inv_lerp = [](AxisType val, AxisType min, AxisType max)
 		{
 			return (val - min) / (max - min);
 		};
 
-		StatsT normalized_input_stats = analysis_function(input);
-		for(int i = 0; i < NumAxis; i++)
-			normalized_input_stats[i] = inv_lerp(normalized_input_stats[i], sourceStats.first[i], sourceStats.second[i]);
+		auto calc_color_stats = [&](const EntryT& v)
+		{
+			auto stats = analysis_function(v);
+			for(int i = 0; i < N; i++)
+				stats[i] = inv_lerp(stats[i], paletteStats.first[i], paletteStats.second[i]);
+			return stats;
+		};
+
+		auto stat_distance = [&](StatsT& a, StatsT& b)
+		{
+			float result = 0.0f;
+			for(int i = 0; i < N; i++)
+			{
+				auto diff = a[i] - b[i];
+				result += diff * diff * weights[i];
+			}
+			return std::sqrt(result);
+		};
+
+		StatsT input_pos = analysis_function(input);
+		for(int i = 0; i < N; i++)
+			input_pos[i] = inv_lerp(input_pos[i], sourceStats.first[i], sourceStats.second[i]);
 		for(auto& entry : pal)
 		{
-			float distance = 0.0f;
-			auto axis = analysis_function(entry);
-			for(int i = 0; i < NumAxis; i++)
-			{
-				auto value = inv_lerp(axis[i], paletteStats.first[i], paletteStats.second[i]);
-				auto diff = (value - normalized_input_stats[i]) * weights[i];
-				distance += diff * diff;
-			}
+			auto axis = calc_color_stats(entry);
+			float distance = stat_distance(axis, input_pos);
 			for(int i = 0; i < NumSamples; i++)
 			{
 				if(distance < sample_distance[i])
@@ -102,28 +116,30 @@ namespace Palette
 					{
 						samples[j] = samples[j-1];
 						sample_distance[j] = sample_distance[j-1];
+						sample_pos[j] = sample_pos[j-1];
 					}
 					samples[i] = &entry;
 					sample_distance[i] = distance;
+					sample_pos[i] = axis;
 					break;
 				}
 			}
 		}
-		if(sample_distance[0] < 0.001f)
+		if(sample_distance[0] < 0.00001f)
 			return *samples[0];
 
-		EntryT result = EntryT(0.0f);
-		float accum = 0.0;
-		constexpr float bias = 0.0001;
-		for(int i = 0; i < NumSamples; i++)
+		int last = (std::find(samples, samples+NumSamples, nullptr)-samples);
+		EntryT result = *samples[last-1];
+		for(int pair = last-2; pair >= 0; pair--)
 		{
-			if(samples[i] != nullptr)
-			{
-				result += *samples[i] / (sample_distance[i] + bias);
-				accum += 1.0 / (sample_distance[i] + bias);
-			}
+			StatsT result_stats = calc_color_stats(result);
+			float a_dist = stat_distance(result_stats, input_pos);
+			float b_dist = stat_distance(sample_pos[pair], input_pos);
+			float whole = a_dist + b_dist;
+			float u_coord = a_dist / whole;
+			float v_coord = b_dist / whole;
+			result = result * v_coord + *samples[pair] * u_coord;
 		}
-		result /= accum;
 		return result;
 	}
 }
