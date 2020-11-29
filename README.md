@@ -93,14 +93,104 @@ There are implicit conversions for a few specific color spaces. This is intended
 
 ![Result of running invert_colors example](docs/invert_colors.jpg)
 ```cpp
+#include <libColorTool.h>
+
+int main()
+{
+	ImageData<sRGB_uint8> img = Image::TGA::import_from_file("source_image.tga").make_copy<sRGB_uint8>();
+	// Apply to a 50x200 rectangle, with the top left corner at 170, 11 image coordinates
+	for(auto& val : Iterate::rectangle(img, 170, 11, 50, 200))
+		val = sRGB_uint8(255) - val;
+	Image::TGA::export_to_file("invert_colors.tga", img.make_copy<sRGB_uint8_Alpha>());
+}
 ```
 
 #### Basic color remapping
 
+![Result of running basic_remap example](docs/basic_remap.jpg)
 ```cpp
+#include <libColorTool.h>
+
+int main()
+{
+	ImageData<LinearRGB>    img        = Image::TGA::import_from_file("source_image.tga").make_copy<LinearRGB>();
+	ColorPalette<LinearRGB> target_pal = Palette::convert<LinearRGB>(Palette::GPL::import_from_file("source_palette.gpl"));
+
+	// With Iterate::chunks we can seperate the image into mutliple, same-sized parts.
+	// These are of course only iterators, the image data itself is not affected.
+	auto halves = Iterate::chunks(img, std::ceil(img.size.x/2.0), img.size.y);
+
+	// This is the first way of mapping the colors, just comparing the color vectors directly, replacing each color with the palette entry whose distance is closest.
+	// This is the method used in most image manipulation programs like GIMP or Photoshop, but is naive and yields low quality results.
+	// We only apply it to the second half of the image.
+	for(auto& color : halves[1])
+		color = Palette::map_color_absolute(target_pal, color);
+	
+	Image::TGA::export_to_file("basic_remap.tga", img.make_copy<sRGB_uint8_Alpha>());
+}
 ```
 
 #### Advanced color remapping
 
+![Result of running smart_remap example](docs/smart_remap.jpg)
+```cpp
+#include <libColorTool.h>
+
+int main(int argc, const char** argv)
+{
+	const char* input_image = "source_image.tga";
+	const char* output_image = "smart_remap.tga";
+	if(argc > 2)
+	{
+		input_image = argv[1];
+		output_image = argv[2];
+	}
+
+	ImageData<LinearRGB>    img        = Image::TGA::import_from_file(input_image).make_copy<LinearRGB>();
+	ColorPalette<LinearRGB> target_pal = Palette::convert<LinearRGB>(Palette::GPL::import_from_file("source_palette.gpl"));
+
+	// The first way we can improve this is by using different set of comparison factors from the raw color values.
+	// Then we can find the minimum and maximum of each of these comparison factors,
+	// this enables us to take the distance of the normalized factors rather than of the absolute factors.
+	auto img_stats    = Stats::gather_stat_range(img.begin(),        img.end(),        Stats::perceptive_factors);
+	auto target_stats = Stats::gather_stat_range(target_pal.begin(), target_pal.end(), Stats::perceptive_factors);
+	// Further, we can give these values different weights to come closer to human perception.
+	// Humans are much more sensitive to Luminance/Brightness than everything else, so we give it 3 times the weight.
+	std::array<float, 5> weights = {6.0f, 1.0f, 1.0f, 1.0f, 1.0f}; 
+
+	// With these parameters set up we can do "relative" color mapping.
+	// Finally we can interpolate between multiple samples in order to get a result with smooth transitions.
+	for(auto& color : img)
+		color = Palette::map_color_relative_multisample(target_pal, color, Stats::perceptive_factors, target_stats, img_stats, weights);
+	
+	Image::TGA::export_to_file(output_image, img.make_copy<sRGB_uint8_Alpha>());
+}
+```
+
 ### Color palettes
 
+![Result of running export_palette example](docs/export_palette.png)
+```cpp
+#include <libColorTool.h>
+
+int main()
+{
+	ColorPalette<sRGB_uint8> input = Palette::GPL::import_from_file("source_palette.gpl");
+	ImageData<sRGB_uint8_Alpha> output;
+
+	Vec2i array_size = {16, int(std::ceil(input.size() / 16.0))};
+	Vec2i block_size = 12;
+
+	output.allocate(array_size*block_size, {0, 0, 0, 0});
+	auto chunks = Iterate::chunks(output, block_size);
+
+	int i = 0;
+	for(int y = 0; y < array_size.y; y++)
+	for(int x = 0; x < array_size.x; x++)
+	for(auto& color : chunks[i++])
+	if(i < input.size())
+		color = input[i];
+
+	Image::TGA::export_to_file("export_palette.tga", output);
+}
+```
