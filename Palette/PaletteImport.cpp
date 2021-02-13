@@ -42,7 +42,7 @@ namespace GPL
 	void export_to_stream(std::ostream& output, const ColorPalette<sRGB_uint8>& data) 
 	{
 		output << "GIMP Palette\n";
-		output << "# Generated using libColorTool\n";
+		output << "# Generated using libColorProcess\n";
 		int i = 0;
 		for(auto& color : data)
 		{

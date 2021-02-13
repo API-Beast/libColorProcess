@@ -1,27 +1,27 @@
-# libColorTool
+# libColorProcess
 
-libColorTool is a modern C++17 library for type-safe image processing. It provides types for the major relative color spaces used in image processing, as well as ways to convert between them. It is lightweight with the STL being the only dependecy.
+libColorProcess is a modern C++17 library for type-safe image processing. It provides types for the major relative color spaces used in image processing, as well as ways to convert between them. It is lightweight with the C++ STL being the only dependecy.
 
 In addition to the different color vectors it also features an ImageData class, iterators for image data as well as functions to deal with color palettes.
 
-## Including libColorTool in your project
+## Including libColorProcess in your project
 
-The easiest way to use libColorTool is using git submodules and CMake.
+The easiest way to use libColorProcess is using git submodules and CMake.
 
 Create a submodule...
 ```bash
-git submodule add https://github.com/API-Beast/libColorTool.git
+git submodule add https://github.com/API-Beast/libColorProcess.git
 ```
 
 ... and add it to your CMakeLists.txt.
 ```cmake
-add_subdirectory(libColorTool)
-target_link_library(YourLib libColorTool)
+add_subdirectory(libColorProcess)
+target_link_library(YourLib libColorProcess)
 ```
 
-CMake will take care of the linker options and include directories, so that now you can include libColorTool.h to get access to all of it's functionality.
+CMake will take care of the linker options and include directories, so that now you can include libColorProcess.h to get access to all of it's functionality.
 ```cpp
-#include <libColorTool.h>
+#include <libColorProcess.h>
 ```
 
 ## Documentation
@@ -35,7 +35,7 @@ CMake will take care of the linker options and include directories, so that now 
 
 ### Color spaces
 
-The following color spaces are supported by libColorTool.
+The following color spaces are supported by libColorProcess.
 
 |      Colorspace | sRGB             | HSV                    | LinearRGB        | LinearHSV              | HCY                    |
 |----------------:|------------------|------------------------|------------------|------------------------|------------------------|
@@ -93,7 +93,7 @@ There are implicit conversions for a few specific color spaces. This is intended
 
 ![Result of running invert_colors example](docs/invert_colors.jpg)
 ```cpp
-#include <libColorTool.h>
+#include <libColorProcess.h>
 
 int main()
 {
@@ -109,7 +109,7 @@ int main()
 
 ![Result of running basic_remap example](docs/basic_remap.jpg)
 ```cpp
-#include <libColorTool.h>
+#include <libColorProcess.h>
 
 int main()
 {
@@ -134,7 +134,7 @@ int main()
 
 ![Result of running smart_remap example](docs/smart_remap.jpg)
 ```cpp
-#include <libColorTool.h>
+#include <libColorProcess.h>
 
 int main(int argc, const char** argv)
 {
@@ -171,7 +171,7 @@ int main(int argc, const char** argv)
 
 ![Result of running export_palette example](docs/export_palette.png)
 ```cpp
-#include <libColorTool.h>
+#include <libColorProcess.h>
 
 int main()
 {
