@@ -167,30 +167,18 @@ int main(int argc, const char** argv)
 }
 ```
 
-### Color palettes
+### Palettes
 
-![Result of running export_palette example](docs/export_palette.png)
 ```cpp
-#include <libColorProcess.h>
-
-int main()
-{
-	ColorPalette<sRGB_uint8> input = Palette::GPL::import_from_file("source_palette.gpl");
-	ImageData<sRGB_uint8_Alpha> output;
-
-	Vec2i array_size = {16, int(std::ceil(input.size() / 16.0))};
-	Vec2i block_size = 12;
-
-	output.allocate(array_size*block_size, {0, 0, 0, 0});
-	auto chunks = Iterate::chunks(output, block_size);
-
-	int i = 0;
-	for(int y = 0; y < array_size.y; y++)
-	for(int x = 0; x < array_size.x; x++)
-	for(auto& color : chunks[i++])
-	if(i < input.size())
-		color = input[i];
-
-	Image::TGA::export_to_file("export_palette.tga", output);
-}
+// Load palettes from GPL files.
+ColorPalette<sRGB_uint8> palette = Palette::GPL::import_from_file("source_palette.gpl");
+// Extract palettes from images
+ImageData<LinearRGB>    img  = Image::TGA::import_from_file(input_image).make_copy<LinearRGB>();
+ColorPalette<LinearRGB> extracted = Palette::import_from_image(img);
+// Reduce number of colors in palette using median split algorithm
+ColorPalette<sRGB_uint8> reduced = Palette::reduce_using_median_split(palette, 8, Stats::srgb_factors);
+// Convert palettes to different color spaces
+auto converted = Palette::convert<HCY>(palette); // Returns a ColorPalette<HCY>
+// Sorting colors so that similar colors are next to each other in palette
+auto sorted = Palette::sort(palette, Stats::linrgb_factors);
 ```
