@@ -18,24 +18,24 @@ using VectorBaseT = typename std::remove_reference<decltype(bool() ? x : y ? y :
 constexpr static bool is_vector3_type = true;\
 constexpr static bool is_vector_type = true;\
 constexpr static int num_components = 3;\
-constexpr bool operator==(const ClassName& other){ return x == other.x && y == other.y && z == other.z;  };\
-constexpr bool operator!=(const ClassName& other){ return !operator==(other);  };\
-constexpr bool operator<(const ClassName& other)\
+constexpr bool operator==(const ClassName& other) const{ return x == other.x && y == other.y && z == other.z;  };\
+constexpr bool operator!=(const ClassName& other) const{ return !operator==(other);  };\
+constexpr bool operator<(const ClassName& other) const\
 {\
 	return x == other.x ? (y == other.y ? z < other.z : y < other.y) : x < other.x;\
 };\
-constexpr bool operator>(const ClassName& other){ return !operator<=(other);  };\
-constexpr bool operator>=(const ClassName& other){ return !operator<(other);  };\
-constexpr bool operator<=(const ClassName& other){ return operator<(other) || operator==(other);  };\
+constexpr bool operator>(const ClassName& other) const{ return !operator<=(other);  };\
+constexpr bool operator>=(const ClassName& other) const{ return !operator<(other);  };\
+constexpr bool operator<=(const ClassName& other) const{ return operator<(other) || operator==(other);  };\
 constexpr ClassName operator-() const{ return ClassName(-(x), -(y), -(z)); };\
 \
-constexpr float square_length(){ return ((x) * (x)) + ((y) * (y)) + ((z) * (z)); };\
-constexpr float length(){ return std::sqrt(square_length()); };\
+constexpr float square_length() const{ return ((x) * (x)) + ((y) * (y)) + ((z) * (z)); };\
+constexpr float length() const{ return std::sqrt(square_length()); };\
 \
-constexpr ClassName normalized(){ float l = length(); return l > 0.0f ? ClassName{static_cast<decltype(x)>(x/l), static_cast<decltype(y)>(y/l), static_cast<decltype(z)>(z/l)} : ClassName(); };\
+constexpr ClassName normalized() const{ float l = length(); return l > 0.0f ? ClassName{static_cast<decltype(x)>(x/l), static_cast<decltype(y)>(y/l), static_cast<decltype(z)>(z/l)} : ClassName(); };\
 \
-constexpr VectorBaseT max_value(){ return x > y ? x : (y > z ? y : z); };\
-constexpr VectorBaseT min_value(){ return x < y ? x : (y < z ? y : z); };\
+constexpr VectorBaseT max_value() const{ return x > y ? x : (y > z ? y : z); };\
+constexpr VectorBaseT min_value() const{ return x < y ? x : (y < z ? y : z); };\
 constexpr decltype(x) get_x() const{ return x; };\
 constexpr decltype(y) get_y() const{ return y; };\
 constexpr decltype(z) get_z() const{ return z; };\
